@@ -1,0 +1,74 @@
+services:
+  skill-repeater-db:
+    image: postgres:15
+    container_name: skill-repeater-db
+    restart: always
+    environment:
+      POSTGRES_DB: ${SKILL_REPEATER_DATABASE_NAME}
+      POSTGRES_USER: ${SKILL_REPEATER_DATABASE_USER}
+      POSTGRES_PASSWORD: ${SKILL_REPEATER_DATABASE_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - skill-repeater-network
+
+  skill-repeater-service:
+    build:
+      context: skill-repeater-service
+      dockerfile: Dockerfile
+    volumes:
+      - ~/.m2:/root/.m2
+    container_name: skill-repeater-service
+    restart: unless-stopped
+    depends_on:
+      - skill-repeater-db
+    environment:
+      MICRONAUT_ENVIRONMENTS: dev
+      GITHUB_USERNAME: ${GITHUB_USERNAME}
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      DATASOURCE_URL: jdbc:postgresql://skill-repeater-db:5432/${SKILL_REPEATER_DATABASE_NAME}
+      DATASOURCE_USERNAME: ${SKILL_REPEATER_DATABASE_USER}
+      DATASOURCE_PASSWORD: ${SKILL_REPEATER_DATABASE_PASSWORD}
+      JWT_GENERATOR_SIGNATURE_SECRET: ${JWT_GENERATOR_SIGNATURE_SECRET}
+      JAEGER_SERVICE_NAME: skill-repeater-service
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "logging=promtail"
+      - "service=skill-repeater-service"
+    networks:
+      - skill-repeater-network
+      - observability-stack-network
+    ports:
+      - "8210:8210"
+      - "5010:5005"  # Debug port
+
+  skill-repeater-front:
+    build:
+      context: skill-repeater-front
+      dockerfile: Dockerfile
+    container_name: skill-repeater-front
+    restart: unless-stopped
+    depends_on:
+      - skill-repeater-service
+    ports:
+      - "3000:80"
+    networks:
+      - skill-repeater-network
+    environment:
+      - NODE_ENV=production
+
+volumes:
+  postgres_data:
+    
+networks:
+  observability-stack-network:
+    external: true 
+  skill-repeater-network:
+    external: true 
