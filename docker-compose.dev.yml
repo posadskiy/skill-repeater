@@ -18,6 +18,9 @@ services:
     build:
       context: skill-repeater-service
       dockerfile: Dockerfile
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
+        GITHUB_USERNAME: ${GITHUB_USERNAME}
     volumes:
       - ~/.m2:/root/.m2
     container_name: skill-repeater-service
