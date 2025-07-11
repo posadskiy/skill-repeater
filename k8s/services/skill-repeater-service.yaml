@@ -36,6 +36,16 @@ spec:
             secretKeyRef:
               name: skill-repeater-secrets
               key: GITHUB_TOKEN
+        - name: SKILL_REPEATER_DATABASE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: skill-repeater-config
+              key: SKILL_REPEATER_DATABASE_NAME
+        - name: SKILL_REPEATER_DATABASE_USER
+          valueFrom:
+            configMapKeyRef:
+              name: skill-repeater-config
+              key: SKILL_REPEATER_DATABASE_USER
         - name: DATASOURCE_URL
           value: "jdbc:postgresql://skill-repeater-db:5432/${SKILL_REPEATER_DATABASE_NAME}"
         - name: DATASOURCE_USERNAME
@@ -86,10 +96,24 @@ metadata:
   labels:
     app: skill-repeater-service
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
   - port: 8210
     targetPort: 8210
     protocol: TCP
   selector:
-    app: skill-repeater-service 
+    app: skill-repeater-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: skill-repeater-service-external
+  namespace: skill-repeater
+  labels:
+    app: skill-repeater-service-external
+spec:
+  type: ExternalName
+  externalName: skill-repeater-service.skill-repeater.svc.cluster.local
+  ports:
+  - port: 8210
+    protocol: TCP 

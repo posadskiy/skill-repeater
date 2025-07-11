@@ -23,12 +23,14 @@ spec:
         env:
         - name: NODE_ENV
           value: "production"
-        - name: VITE_API_URL
-          value: "http://skill-repeater-service.skill-repeater.svc.cluster.local:8210"
         - name: VITE_AUTH_URL
           value: "/auth"
         - name: VITE_USER_URL
           value: "/user"
+        - name: USER_SERVICE_URL
+          value: "http://user-service:8095"
+        - name: AUTH_SERVICE_URL
+          value: "http://auth-service:8100"
         resources:
           requests:
             memory: "128Mi"
