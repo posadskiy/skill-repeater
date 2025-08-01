@@ -50,7 +50,7 @@ fi
 # Deploy service with version substitution
 echo "🌐 Deploying skill-repeater-front..."
 export IMAGE_VERSION=$VERSION
-envsubst < "$K8S_DIR/services/skill-repeater-front.yaml" | kubectl apply -f -
+envsubst < "$K8S_DIR/../skill-repeater-front/k8s/skill-repeater-front.yaml" | kubectl apply -f -
 
 # Wait for service to be ready
 echo "⏳ Waiting for skill-repeater-front to be ready..."

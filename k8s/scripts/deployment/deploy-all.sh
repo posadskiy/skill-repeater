@@ -92,10 +92,10 @@ echo "🚀 Deploying all services..."
 export IMAGE_VERSION=$VERSION
 
 echo "🔧 Deploying skill-repeater-service..."
-envsubst < "$K8S_DIR/services/skill-repeater-service.yaml" | kubectl apply -f -
+envsubst < "$K8S_DIR/../skill-repeater-service/k8s/skill-repeater-service.yaml" | kubectl apply -f -
 
 echo "🌐 Deploying skill-repeater-front..."
-envsubst < "$K8S_DIR/services/skill-repeater-front.yaml" | kubectl apply -f -
+envsubst < "$K8S_DIR/../skill-repeater-front/k8s/skill-repeater-front.yaml" | kubectl apply -f -
 
 # Wait for all services to be ready
 echo "⏳ Waiting for all services to be ready..."
