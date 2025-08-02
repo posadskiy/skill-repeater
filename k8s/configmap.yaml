@@ -5,9 +5,8 @@ metadata:
   namespace: skill-repeater
 data:
   MICRONAUT_ENVIRONMENTS: "prod"
-  SKILL_REPEATER_DATABASE_NAME: "${SKILL_REPEATER_DATABASE_NAME}"
-  SKILL_REPEATER_DATABASE_USER: "${SKILL_REPEATER_DATABASE_USER}"
+  SKILL_REPEATER_DATABASE_NAME: "skill_repeater"
+  SKILL_REPEATER_DATABASE_USER: "kraken"
   SKILL_REPEATER_DATASOURCE_URL: "jdbc:postgresql://skill-repeater-db:5432/skill_repeater"
-  GITHUB_USERNAME: "${GITHUB_USERNAME}"
-  JAEGER_ENDPOINT: "${JAEGER_ENDPOINT:-http://jaeger-collector.observability-stack:14268/api/traces}"
-  JWT_GENERATOR_SIGNATURE_SECRET: "${JWT_GENERATOR_SIGNATURE_SECRET}"
+  GITHUB_USERNAME: "posadskiy"
+  JAEGER_ENDPOINT: "http://jaeger-collector.observability-stack:14268/api/traces"
