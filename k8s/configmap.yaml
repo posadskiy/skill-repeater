@@ -10,6 +10,4 @@ data:
   SKILL_REPEATER_DATASOURCE_URL: "jdbc:postgresql://skill-repeater-db:5432/skill_repeater"
   GITHUB_USERNAME: "posadskiy"
   JAEGER_ENDPOINT: "http://jaeger-collector.observability-stack:14268/api/traces"
-  API_BASE_URL: "https://api.posadskiy.com/skill-repeater"
-  AUTH_API_BASE_URL: "https://api.posadskiy.com/auth"
-  USER_API_BASE_URL: "https://api.posadskiy.com/user"
+
