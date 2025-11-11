@@ -1,5 +1,5 @@
 #!/bin/bash
-# deploy-skill-repeater-service.sh - Deploy skill-repeater service to GKE autopilot cluster
+# deploy-skill-repeater-service.sh - Deploy skill-repeater service to Kubernetes cluster
 # Usage: ./deploy-skill-repeater-service.sh <version>
 
 set -e  # Exit on any error
@@ -18,19 +18,16 @@ fi
 VERSION=$1
 
 # Configuration
-PROJECT_ID=$(gcloud config get-value project)
-CLUSTER_NAME="autopilot-cluster-1"
-NAMESPACE="skill-repeater"
+NAMESPACE="${K8S_NAMESPACE:-skill-repeater}"
+DOCKERHUB_USERNAME="${DOCKERHUB_USERNAME:-}"
 
-echo "🔧 Deploying skill-repeater-service to GKE autopilot cluster..."
-echo "📦 Project ID: $PROJECT_ID"
-echo "🏗️  Cluster: $CLUSTER_NAME"
+echo "🔧 Deploying skill-repeater-service to Kubernetes cluster..."
 echo "🏷️  Version: $VERSION"
 echo "📁 Namespace: $NAMESPACE"
 
 # Check required environment variables
 echo "🔍 Checking required environment variables..."
-REQUIRED_VARS=("SKILL_REPEATER_DATABASE_PASSWORD" "JWT_GENERATOR_SIGNATURE_SECRET" "GITHUB_TOKEN" "GITHUB_USERNAME" "SKILL_REPEATER_DATABASE_NAME" "SKILL_REPEATER_DATABASE_USER")
+REQUIRED_VARS=("SKILL_REPEATER_DATABASE_PASSWORD" "JWT_GENERATOR_SIGNATURE_SECRET" "GITHUB_TOKEN" "GITHUB_USERNAME" "SKILL_REPEATER_DATABASE_NAME" "SKILL_REPEATER_DATABASE_USER" "DOCKERHUB_USERNAME")
 MISSING_VARS=()
 
 for var in "${REQUIRED_VARS[@]}"; do
@@ -52,23 +49,21 @@ if [ ${#MISSING_VARS[@]} -ne 0 ]; then
     echo "   export GITHUB_USERNAME='your-github-username'"
     echo "   export SKILL_REPEATER_DATABASE_NAME='skillrepeater'"
     echo "   export SKILL_REPEATER_DATABASE_USER='skillrepeater_user'"
+    echo "   export DOCKERHUB_USERNAME='your-dockerhub-username'"
     exit 1
 fi
 
 echo "✅ All required environment variables are set"
 
-# Check if cluster exists and get credentials
-echo "🔍 Checking cluster access..."
-if ! gcloud container clusters describe $CLUSTER_NAME --zone=europe-central2 > /dev/null 2>&1; then
-    echo "❌ Cluster $CLUSTER_NAME not found in europe-central2"
-    echo "💡 Please check the cluster name and zone, or run:"
-    echo "   gcloud container clusters list"
+# Check if kubectl is available and cluster is accessible
+echo "🔍 Checking kubectl connection..."
+if ! kubectl cluster-info > /dev/null 2>&1; then
+    echo "❌ kubectl is not configured or cluster is not accessible"
+    echo "💡 Please configure kubectl to connect to your Kubernetes cluster"
     exit 1
 fi
 
-# Get cluster credentials
-echo "🔐 Getting cluster credentials..."
-gcloud container clusters get-credentials $CLUSTER_NAME --zone=europe-central2
+echo "✅ kubectl is configured and cluster is accessible"
 
 # Check if namespace exists
 if ! kubectl get namespace $NAMESPACE > /dev/null 2>&1; then
@@ -84,6 +79,7 @@ envsubst < "$K8S_DIR/secrets.yaml" | kubectl apply -f -
 # Deploy service with version substitution
 echo "🔧 Deploying skill-repeater-service..."
 export IMAGE_VERSION=$VERSION
+export DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME
 envsubst < "$K8S_DIR/../skill-repeater-service/k8s/skill-repeater-service.yaml" | kubectl apply -f -
 
 # Wait for service to be ready

@@ -34,6 +34,13 @@ fi
 
 # Skill Repeater Front (Frontend)
 echo "🌐 Building and pushing Skill Repeater Front to Docker Hub..."
-docker buildx build --platform linux/amd64 --build-arg GITHUB_USERNAME=$GITHUB_USERNAME --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -f skill-repeater-front/Dockerfile.prod -t $DOCKERHUB_USERNAME/skill-repeater-front:$VERSION -t $DOCKERHUB_USERNAME/skill-repeater-front:$TAG_DATE skill-repeater-front/ --push
+docker buildx build --platform linux/arm64 \
+  --build-arg VITE_API_URL=https://api.posadskiy.com/skill-repeater \
+  --build-arg VITE_AUTH_URL=https://api.posadskiy.com/auth \
+  --build-arg VITE_USER_URL=https://api.posadskiy.com/user \
+  -f skill-repeater-front/Dockerfile.prod \
+  -t $DOCKERHUB_USERNAME/skill-repeater-front:$VERSION \
+  -t $DOCKERHUB_USERNAME/skill-repeater-front:$TAG_DATE \
+  skill-repeater-front/ --push
 
 echo "✅ Skill Repeater Front built and pushed to Docker Hub successfully!" 

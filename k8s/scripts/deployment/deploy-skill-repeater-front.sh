@@ -1,5 +1,5 @@
 #!/bin/bash
-# deploy-skill-repeater-front.sh - Deploy skill-repeater frontend to GKE autopilot cluster
+# deploy-skill-repeater-front.sh - Deploy skill-repeater frontend to Kubernetes cluster
 # Usage: ./deploy-skill-repeater-front.sh <version>
 
 set -e  # Exit on any error
@@ -18,28 +18,29 @@ fi
 VERSION=$1
 
 # Configuration
-PROJECT_ID=$(gcloud config get-value project)
-CLUSTER_NAME="autopilot-cluster-1"
-NAMESPACE="skill-repeater"
+NAMESPACE="${K8S_NAMESPACE:-skill-repeater}"
+DOCKERHUB_USERNAME="${DOCKERHUB_USERNAME:-}"
 
-echo "🌐 Deploying skill-repeater-front to GKE autopilot cluster..."
-echo "📦 Project ID: $PROJECT_ID"
-echo "🏗️  Cluster: $CLUSTER_NAME"
+echo "🌐 Deploying skill-repeater-front to Kubernetes cluster..."
 echo "🏷️  Version: $VERSION"
 echo "📁 Namespace: $NAMESPACE"
 
-# Check if cluster exists and get credentials
-echo "🔍 Checking cluster access..."
-if ! gcloud container clusters describe $CLUSTER_NAME --zone=europe-central2 > /dev/null 2>&1; then
-    echo "❌ Cluster $CLUSTER_NAME not found in europe-central2"
-    echo "💡 Please check the cluster name and zone, or run:"
-    echo "   gcloud container clusters list"
+# Check required environment variables
+if [ -z "$DOCKERHUB_USERNAME" ]; then
+    echo "❌ Error: DOCKERHUB_USERNAME environment variable is not set"
+    echo "💡 Please set it with: export DOCKERHUB_USERNAME=your-dockerhub-username"
     exit 1
 fi
 
-# Get cluster credentials
-echo "🔐 Getting cluster credentials..."
-gcloud container clusters get-credentials $CLUSTER_NAME --zone=europe-central2
+# Check if kubectl is available and cluster is accessible
+echo "🔍 Checking kubectl connection..."
+if ! kubectl cluster-info > /dev/null 2>&1; then
+    echo "❌ kubectl is not configured or cluster is not accessible"
+    echo "💡 Please configure kubectl to connect to your Kubernetes cluster"
+    exit 1
+fi
+
+echo "✅ kubectl is configured and cluster is accessible"
 
 # Check if namespace exists
 if ! kubectl get namespace $NAMESPACE > /dev/null 2>&1; then
@@ -50,6 +51,7 @@ fi
 # Deploy service with version substitution
 echo "🌐 Deploying skill-repeater-front..."
 export IMAGE_VERSION=$VERSION
+export DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME
 envsubst < "$K8S_DIR/../skill-repeater-front/k8s/skill-repeater-front.yaml" | kubectl apply -f -
 
 # Wait for service to be ready
