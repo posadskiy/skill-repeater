@@ -33,7 +33,6 @@ kubectl create secret docker-registry dockerhub-registry-secret \
     --docker-server=https://index.docker.io/v1/ \
     --docker-username=$DOCKERHUB_USERNAME \
     --docker-password=$DOCKERHUB_TOKEN \
-    --docker-email=$DOCKERHUB_USERNAME@example.com \
     --namespace=$NAMESPACE \
     --dry-run=client -o yaml | kubectl apply -f -
 
