@@ -6,8 +6,8 @@ metadata:
 data:
   MICRONAUT_ENVIRONMENTS: "prod"
   SKILL_REPEATER_DATABASE_NAME: "skill_repeater_db"
-  SKILL_REPEATER_DATABASE_USER: "neondb_owner"
-  SKILL_REPEATER_DATASOURCE_URL: "jdbc:postgresql://ep-spring-star-ag0jfnwi-pooler.c-2.eu-central-1.aws.neon.tech/skill_repeater_db?sslmode=require"
+  SKILL_REPEATER_DATABASE_USER: "avnadmin"
+  SKILL_REPEATER_DATASOURCE_URL: "jdbc:postgresql://shared-posadskiy.e.aivencloud.com:25370/skill_repeater_db?sslmode=require"
   GITHUB_USERNAME: "posadskiy"
   JAEGER_ENDPOINT: "http://jaeger-collector.observability-stack:14268/api/traces"
 
