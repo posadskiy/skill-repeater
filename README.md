@@ -146,7 +146,7 @@ java -jar skill-repeater-web/target/skill-repeater-web-*.jar
 # Create .env with required variables:
 # VITE_API_URL=http://localhost:8210/
 # VITE_AUTH_URL=http://localhost:8100/
-# VITE_USER_URL=http://localhost:8090/v0
+# VITE_USER_URL=http://localhost:8090/
 
 npm ci
 npm run dev
