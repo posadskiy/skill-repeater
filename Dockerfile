@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . .
 
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn -B clean package -pl skill-repeater-web -am -DskipTests
+    mvn -B clean install -pl skill-repeater-web -am -DskipTests
 
 # === Stage 2: Create the runtime image ===
 FROM amazoncorretto:25-alpine-jdk

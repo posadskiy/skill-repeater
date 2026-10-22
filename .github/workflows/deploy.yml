@@ -131,7 +131,7 @@ jobs:
       id: build
       run: |
         echo "🏗️ Building application..."
-        mvn clean package -DskipTests
+        mvn clean install -DskipTests
         
         # Create Docker Hub image tags
         TAG_DATE=$(date +%Y%m%d%H%M%S)
@@ -332,7 +332,7 @@ jobs:
         echo "" >> release_body.md
         echo "### 🔧 Build Instructions" >> release_body.md
         echo '```bash' >> release_body.md
-        echo "mvn clean package -DskipTests" >> release_body.md
+        echo "mvn clean install -DskipTests" >> release_body.md
         echo "java -jar web/target/skill-repeater-service-web-*.jar" >> release_body.md
         echo '```' >> release_body.md
         echo "" >> release_body.md
