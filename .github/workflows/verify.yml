@@ -14,4 +14,5 @@ jobs:
           distribution: temurin
           java-version: "25"
           cache: maven
-      - run: mvn -B verify
+      # AOT starts a second Maven build, which only sees jars already installed locally.
+      - run: mvn -B install
