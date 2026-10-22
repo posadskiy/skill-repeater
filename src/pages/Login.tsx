@@ -12,7 +12,7 @@ export function Login() {
   const navigate = useNavigate();
 
   return (
-    <Container size="xs" h="100vh" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <Container size="xs" px="md" py="xl" mih="100dvh" style={{ display: 'flex', alignItems: 'center' }}>
       <AuthLogin
         apiUrl={serviceUrl(AUTH_URL!, '/login')}
         oauthApiUrl={AUTH_URL!.replace(/\/$/, '')}

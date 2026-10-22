@@ -11,7 +11,7 @@ export function Register() {
   const navigate = useNavigate();
 
   return (
-    <Container size="xs" h="100vh" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <Container size="xs" px="md" py="xl" mih="100dvh" style={{ display: 'flex', alignItems: 'center' }}>
       <AuthRegister
         apiUrl={serviceUrl(USER_URL!, '/signup')}
         oauthApiUrl={AUTH_URL!.replace(/\/$/, '')}

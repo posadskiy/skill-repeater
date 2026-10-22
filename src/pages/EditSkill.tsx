@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Container, Paper, Title, TextInput, Textarea, Select, Button, Stack, Text, NumberInput, Group, Flex, Modal } from '@mantine/core';
+import { Alert, Container, Paper, Title, TextInput, Textarea, Select, Button, Stack, Text, NumberInput, SimpleGrid, Modal } from '@mantine/core';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { problemMessage } from '../api/problem';
 import { skillsApi } from '../api/skills';
 import { PRIORITY_SELECT_OPTIONS, type Period, type Priority } from '../types/api';
 
@@ -93,6 +94,11 @@ export function EditSkill() {
 
         <form onSubmit={handleSubmit}>
           <Stack>
+            {(updateMutation.isError || deleteMutation.isError) && (
+              <Alert color="red" role="alert">
+                {problemMessage(updateMutation.isError ? updateMutation.error : deleteMutation.error)}
+              </Alert>
+            )}
             <TextInput
               required
               label="Name"
@@ -109,7 +115,7 @@ export function EditSkill() {
               onChange={(e) => setDescription(e.target.value)}
             />
 
-            <Group grow>
+            <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="sm">
               <NumberInput
                 required
                 label="Repeat Every"
@@ -117,7 +123,6 @@ export function EditSkill() {
                 min={1}
                 value={number}
                 onChange={(value) => setNumber(typeof value === 'string' ? '' : value)}
-                style={{ flex: 1 }}
               />
 
               <Select
@@ -133,9 +138,8 @@ export function EditSkill() {
                 ]}
                 value={period}
                 onChange={(value) => setPeriod(value as Period)}
-                style={{ flex: 1 }}
               />
-            </Group>
+            </SimpleGrid>
 
             <Select
               required
@@ -146,19 +150,19 @@ export function EditSkill() {
               onChange={(value) => setPriority((value as Priority) ?? 'MEDIUM')}
             />
 
-            <Flex gap="md" mt="md">
-              <Button type="submit" loading={updateMutation.isPending} style={{ flex: 1 }}>
+            <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="sm" mt="md">
+              <Button type="submit" fullWidth loading={updateMutation.isPending}>
                 Update Skill
               </Button>
-              <Button 
-                color="red" 
+              <Button
+                color="red"
+                fullWidth
                 loading={deleteMutation.isPending}
                 onClick={handleDelete}
-                style={{ flex: 1 }}
               >
                 Delete Skill
               </Button>
-            </Flex>
+            </SimpleGrid>
           </Stack>
         </form>
       </Paper>
@@ -171,23 +175,23 @@ export function EditSkill() {
       >
         <Stack>
           <Text>Are you sure you want to delete this skill? This action cannot be undone.</Text>
-          <Flex gap="md" mt="md">
-            <Button 
-              variant="outline" 
-              onClick={() => setDeleteModalOpened(false)} 
-              style={{ flex: 1 }}
+          <SimpleGrid cols={2} spacing="sm" mt="md">
+            <Button
+              variant="outline"
+              fullWidth
+              onClick={() => setDeleteModalOpened(false)}
             >
               Cancel
             </Button>
-            <Button 
-              color="red" 
+            <Button
+              color="red"
+              fullWidth
               onClick={confirmDelete}
               loading={deleteMutation.isPending}
-              style={{ flex: 1 }}
             >
               Delete
             </Button>
-          </Flex>
+          </SimpleGrid>
         </Stack>
       </Modal>
     </Container>

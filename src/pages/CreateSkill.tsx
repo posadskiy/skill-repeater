@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Container, Paper, Title, TextInput, Textarea, Select, Button, Stack, Text, NumberInput, Group, Checkbox } from '@mantine/core';
+import { Alert, Container, Paper, Title, TextInput, Textarea, Select, Button, Stack, Text, NumberInput, SimpleGrid, Checkbox } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { problemMessage } from '../api/problem';
 import { skillsApi } from '../api/skills';
 import { PRIORITY_SELECT_OPTIONS, type Period, type Priority } from '../types/api';
 
@@ -52,6 +53,11 @@ export function CreateSkill() {
 
         <form onSubmit={handleSubmit}>
           <Stack>
+            {addMutation.isError && (
+              <Alert color="red" role="alert">
+                {problemMessage(addMutation.error)}
+              </Alert>
+            )}
             <TextInput
               required
               label="Name"
@@ -68,7 +74,7 @@ export function CreateSkill() {
               onChange={(e) => setDescription(e.target.value)}
             />
 
-            <Group grow>
+            <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="sm">
               <NumberInput
                 required
                 label="Repeat Every"
@@ -76,7 +82,6 @@ export function CreateSkill() {
                 min={1}
                 value={number}
                 onChange={(value) => setNumber(typeof value === 'string' ? '' : value)}
-                style={{ flex: 1 }}
               />
 
               <Select
@@ -92,9 +97,8 @@ export function CreateSkill() {
                 ]}
                 value={period}
                 onChange={(value) => setPeriod(value as Period)}
-                style={{ flex: 1 }}
               />
-            </Group>
+            </SimpleGrid>
 
             <Select
               required

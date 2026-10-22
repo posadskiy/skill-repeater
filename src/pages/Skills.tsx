@@ -39,7 +39,7 @@ export function Skills() {
   return (
     <Container size="xs" px="xs">
       <Stack gap="md">
-        <Group justify="space-between" align="center">
+        <Group justify="space-between" align="center" wrap="wrap">
           <Title order={2}>Skills</Title>
           <Button onClick={() => navigate('/skills/create')}>Create Skill</Button>
         </Group>
@@ -68,14 +68,14 @@ export function Skills() {
                 <Text size="sm" c="dimmed">
                   Next: {skill.nextRepeated ? new Date(skill.nextRepeated).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '—'}
                 </Text>
-                <Group>
-                  <Button variant="light" onClick={() => navigate(`/skills/${skill.id}`)}>
+                <SimpleGrid cols={2} spacing="xs">
+                  <Button variant="light" fullWidth onClick={() => navigate(`/skills/${skill.id}`)}>
                     Details
                   </Button>
-                  <Button variant="light" color="blue" onClick={() => navigate(`/skills/${skill.id}/edit`)}>
+                  <Button variant="light" color="blue" fullWidth onClick={() => navigate(`/skills/${skill.id}/edit`)}>
                     Edit
                   </Button>
-                </Group>
+                </SimpleGrid>
               </Stack>
             </Card>
           ))}

@@ -1,4 +1,4 @@
-import { Container, Paper, Title } from '@mantine/core';
+import { Container, Title } from '@mantine/core';
 import { ThemeProvider } from '@mui/material/styles';
 import { UserService } from 'user-component-react';
 import { USER_URL } from '../api/client';
@@ -20,19 +20,18 @@ export function UserSettings() {
   }
 
   return (
-    <Container size="md" py="xl">
-      <Paper radius="md" p="xl" withBorder>
-        <Title ta="center" mb="xl">User Settings</Title>
-        <ThemeProvider theme={{}}>
-          <UserService
-            apiUrl={USER_URL!}
-            userId={userId}
-            bearerToken={token}
-            onError={handleError}
-            onSuccess={handleSuccess}
-          />
-        </ThemeProvider>
-      </Paper>
+    <Container size="sm" px="xs" py="md">
+      <Title order={2} mb="md">Account</Title>
+      <ThemeProvider theme={{}}>
+        <UserService
+          apiUrl={USER_URL!}
+          userId={userId}
+          bearerToken={token}
+          onError={handleError}
+          onSuccess={handleSuccess}
+          sx={{ mt: 0, maxWidth: '100%' }}
+        />
+      </ThemeProvider>
     </Container>
   );
 }

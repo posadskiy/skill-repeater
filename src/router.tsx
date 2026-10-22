@@ -9,7 +9,6 @@ import {
   useLocation,
   useNavigate,
 } from 'react-router-dom';
-import { IconUser } from '@tabler/icons-react';
 import { withFaroRouterInstrumentation } from '@grafana/faro-react';
 import { CreateSkill } from './pages/CreateSkill';
 import { EditSkill } from './pages/EditSkill';
@@ -51,23 +50,26 @@ function AppLayout() {
       padding={{ base: 'xs', sm: 'md' }}
     >
       <AppShell.Header>
-        <Group h="100%" px={{ base: 'xs', sm: 'md' }} justify="space-between">
-          <Group>
+        <Group h="100%" px="sm" justify="space-between" wrap="nowrap" gap="xs">
+          <Group gap="xs" wrap="nowrap" style={{ minWidth: 0 }}>
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-            <Text size="lg" fw={700}>
+            <Text size="md" fw={700} truncate>
               Skill Repeater
             </Text>
           </Group>
-          <Group>
+          <Group gap={4} wrap="nowrap">
             <Button
               variant="light"
-              leftSection={<IconUser size={16} />}
-              onClick={() => navigate('/settings')}
+              size="compact-sm"
+              onClick={() => {
+                navigate('/settings');
+                close();
+              }}
             >
-              Settings
+              Account
             </Button>
-            <Button variant="light" onClick={handleLogout}>
-              Logout
+            <Button variant="subtle" size="compact-sm" onClick={handleLogout}>
+              Log out
             </Button>
           </Group>
         </Group>
@@ -102,6 +104,20 @@ function AppLayout() {
             }}
           >
             Create Skill
+          </UnstyledButton>
+          <UnstyledButton
+            onClick={() => {
+              navigate('/settings');
+              close();
+            }}
+            style={{
+              padding: rem(8),
+              borderRadius: rem(6),
+              fontWeight: 500,
+              textAlign: 'left',
+            }}
+          >
+            Account
           </UnstyledButton>
         </Stack>
       </AppShell.Navbar>

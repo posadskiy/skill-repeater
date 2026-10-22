@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Card, Text, Button, Group, Stack, Title } from '@mantine/core';
+import { Alert, Container, Card, Text, Button, Group, SimpleGrid, Stack, Title } from '@mantine/core';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { problemMessage } from '../api/problem';
 import { skillsApi } from '../api/skills';
 import { priorityLabel, type ReviewRating } from '../types/api';
 
@@ -50,18 +51,23 @@ export function SkillDetails() {
   return (
     <Container size="xs" px="xs">
       <Stack gap="md">
-        <Group justify="space-between" align="center">
-          <Title order={2}>{skill.name}</Title>
-          <Group>
-            <Button variant="light" onClick={() => navigate(`/skills/${id}/edit`)}>
-              Edit
-            </Button>
-            <Button color="red" onClick={() => reviewMutation.mutate('AGAIN')} loading={reviewMutation.isPending}>Again</Button>
-            <Button color="orange" onClick={() => reviewMutation.mutate('HARD')} loading={reviewMutation.isPending}>Hard</Button>
-            <Button onClick={() => reviewMutation.mutate('GOOD')} loading={reviewMutation.isPending}>Good</Button>
-            <Button color="teal" onClick={() => reviewMutation.mutate('EASY')} loading={reviewMutation.isPending}>Easy</Button>
-          </Group>
+        {reviewMutation.isError && (
+          <Alert color="red" role="alert">
+            {problemMessage(reviewMutation.error)}
+          </Alert>
+        )}
+        <Group justify="space-between" align="center" wrap="wrap">
+          <Title order={2} style={{ overflowWrap: 'anywhere' }}>{skill.name}</Title>
+          <Button variant="light" onClick={() => navigate(`/skills/${id}/edit`)}>
+            Edit
+          </Button>
         </Group>
+        <SimpleGrid cols={2} spacing="xs">
+          <Button color="red" fullWidth onClick={() => reviewMutation.mutate('AGAIN')} loading={reviewMutation.isPending}>Again</Button>
+          <Button color="orange" fullWidth onClick={() => reviewMutation.mutate('HARD')} loading={reviewMutation.isPending}>Hard</Button>
+          <Button fullWidth onClick={() => reviewMutation.mutate('GOOD')} loading={reviewMutation.isPending}>Good</Button>
+          <Button color="teal" fullWidth onClick={() => reviewMutation.mutate('EASY')} loading={reviewMutation.isPending}>Easy</Button>
+        </SimpleGrid>
 
         <Card withBorder>
           <Stack gap="xs">
@@ -83,15 +89,14 @@ export function SkillDetails() {
             {history?.map((record) => {
               const date = new Date(record.repeatedAt);
               return (
-                <Group key={record.id} justify="space-between" wrap="nowrap" gap="xs">
-                  <Text size="sm" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
+                <Group key={record.id} justify="space-between" wrap="wrap" gap="xs">
+                  <Text size="sm" c="dimmed">
                     {date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                  </Text>
-                  <Text size="sm" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
-                    {record.rating ?? '—'} · level {record.level ?? '—'}
-                  </Text>
-                  <Text size="sm" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
+                    {' · '}
                     {date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                  <Text size="sm" c="dimmed">
+                    {record.rating ?? '—'} · level {record.level ?? '—'}
                   </Text>
                 </Group>
               );
