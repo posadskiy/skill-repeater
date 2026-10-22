@@ -26,12 +26,6 @@
         </dependency>
 
         <!-- Modules -->
-        <dependency>
-            <groupId>com.posadskiy.email</groupId>
-            <artifactId>email-template-service-api</artifactId>
-            <version>0.2.0</version>
-        </dependency>
-        <!-- Modules -->
 
         <!-- HTTP -->
         <dependency>

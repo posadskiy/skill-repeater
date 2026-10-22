@@ -23,6 +23,5 @@ public class Skill {
     private Integer level;
     private Priority priority;
     private Long intervalSeconds;
-    private OffsetDateTime lastNotifiedAt;
     private Boolean learnNow;
 }

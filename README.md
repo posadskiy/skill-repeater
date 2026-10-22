@@ -1,13 +1,13 @@
 # Skill Repeater Service
 
-Micronaut backend for the Skill Repeater platform. Provides a REST API for managing skills with spaced-repetition logic, repetition history tracking, and scheduled email reminders.
+Micronaut backend for the Skill Repeater platform. Provides a REST API for managing skills with spaced-repetition logic and repetition history. Due skills are shown in the app.
 
 ## Features
 
 - **Skill CRUD** — create, read, update, and delete skills per user
 - **Spaced repetition engine** — a review is rated Again, Hard, Good, or Easy. Good and Easy raise the level and grow the interval; Again returns to the starting interval.
 - **Repetition history** — each review stores the rating, the interval just applied, and the level
-- **Scheduled reminders** — one job every 15 minutes emails due skills once, after the user's local reminder hour
+- **Due queue** — `GET /v0/skills/due` returns the skills ready to review, capped at 10
 - **OpenAPI / Swagger UI** — auto-generated API documentation in development
 - **Distributed tracing** — Jaeger integration for request tracing
 - **Metrics** — Prometheus endpoint for monitoring
@@ -31,13 +31,6 @@ Micronaut backend for the Skill Repeater platform. Provides a REST API for manag
 | `GET` | `/v0/skills/{id}/history` | Page of reviews for a skill |
 | `GET` | `/v0/skills/reviews` | Page of the current user's reviews |
 
-### Settings (`/v0/settings`)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/v0/settings` | Reminder time zone and hour. Defaults are UTC and 09:00 |
-| `PUT` | `/v0/settings` | Save reminder time zone and hour |
-
 ### Infrastructure
 
 | Path | Description |
@@ -57,15 +50,13 @@ skill-repeater-service/
 │   ├── model/                    # Skill, RepeatHistory entities
 │   ├── repository/               # Micronaut Data JDBC repositories
 │   ├── service/                  # SkillService, RepeatHistoryService
-│   ├── worker/                   # ReminderJob (every 15 minutes)
-│   └── notification/             # Email notification via external services
 └── skill-repeater-web/           # HTTP application
-    ├── controller/               # SkillController, SettingsController
+    ├── controller/               # SkillController
     ├── exception/                # Global exception handlers
     └── resources/
         ├── application-dev.yml   # Dev config (local PostgreSQL)
         ├── application-prod.yml  # Prod config (env-based)
-        └── db/migration/         # Flyway migrations (V1–V8)
+        └── db/migration/         # Flyway migrations (V1–V9)
 ```
 
 ## Tech Stack
@@ -73,7 +64,7 @@ skill-repeater-service/
 - **Runtime:** Java 25, Micronaut 4.5 (Netty)
 - **Build:** Maven (multi-module), Maven Shade (fat JAR)
 - **Database:** PostgreSQL via Micronaut Data JDBC + HikariCP
-- **Migrations:** Flyway (7 migration files)
+- **Migrations:** Flyway (V1–V9)
 - **Security:** Micronaut Security JWT (Bearer tokens)
 - **API docs:** OpenAPI 3.0 + Swagger UI
 - **Observability:** Jaeger tracing, Micrometer + Prometheus
@@ -101,9 +92,6 @@ On **repeat**: `lastRepeated` = now, `nextRepeated` = now + (number × period), 
 | `JWT_GENERATOR_SIGNATURE_SECRET` | HMAC secret used to validate access tokens from auth-service | — |
 | `AUTH_JWT_ISSUER` | Expected JWT issuer | `https://auth.posadskiy.com` |
 | `AUTH_JWT_AUDIENCE` | Expected JWT audience | `api.posadskiy.com` |
-| `AUTH_SERVICE_URL` | Auth service base URL for reminder client-credentials | `http://auth-service.local` |
-| `AUTH_SERVICE_CLIENT_ID` | Service account client id | `system` |
-| `AUTH_SERVICE_CLIENT_SECRET` | Service account client secret | — |
 | `OTEL_SERVICE_NAME` | Logical service name for traces | `skill-repeater-service` |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP gRPC endpoint (Grafana Alloy) | `http://localhost:4317` |
 | `OTEL_TRACES_SAMPLER` | OpenTelemetry sampler | `parentbased_traceidratio` |

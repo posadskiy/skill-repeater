@@ -48,9 +48,6 @@ public class SkillEntity {
     @NotNull
     private Long intervalSeconds;
 
-    @Nullable
-    private OffsetDateTime lastNotifiedAt;
-
     @DateUpdated
     private OffsetDateTime updatedAt;
 
@@ -151,14 +148,6 @@ public class SkillEntity {
 
     public void setIntervalSeconds(Long intervalSeconds) {
         this.intervalSeconds = intervalSeconds;
-    }
-
-    public OffsetDateTime getLastNotifiedAt() {
-        return lastNotifiedAt;
-    }
-
-    public void setLastNotifiedAt(OffsetDateTime lastNotifiedAt) {
-        this.lastNotifiedAt = lastNotifiedAt;
     }
 
     public OffsetDateTime getUpdatedAt() {

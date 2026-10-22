@@ -54,8 +54,7 @@ class SkillFlowIntegrationTest implements TestPropertyProvider {
                 "datasources.default.dialect", "POSTGRES",
                 "datasources.default.schema-generate", "NONE",
                 "datasources.default.maximum-pool-size", "2",
-                "flyway.datasources.default.enabled", "true",
-                "reminders.enabled", "false"
+                "flyway.datasources.default.enabled", "true"
         );
     }
 

@@ -18,20 +18,13 @@ public interface SkillRepository extends CrudRepository<SkillEntity, String> {
 
     long countByUserId(String userId);
 
-    List<SkillEntity> findByUserIdAndNextRepeatedLessThanEqualsOrderByNextRepeatedAscPriorityDesc(
+    List<SkillEntity> findByUserIdAndNextRepeatedLessThanEqualsOrderByNextRepeatedAscAndPriorityDesc(
             String userId,
             OffsetDateTime now,
             Pageable pageable
     );
 
     void deleteByUserId(String userId);
-
-    @Query("""
-            SELECT * FROM skills
-            WHERE next_repeated <= :now
-              AND (last_notified_at IS NULL OR last_notified_at < next_repeated)
-            """)
-    List<SkillEntity> findPendingReminders(OffsetDateTime now);
 
     @Query("""
             UPDATE skills
@@ -51,12 +44,4 @@ public interface SkillRepository extends CrudRepository<SkillEntity, String> {
             long intervalSeconds,
             OffsetDateTime updatedAt
     );
-
-    @Query("""
-            UPDATE skills
-            SET last_notified_at = :notifiedAt
-            WHERE id = :id
-              AND (last_notified_at IS NULL OR last_notified_at < next_repeated)
-            """)
-    int markNotified(String id, OffsetDateTime notifiedAt);
 }

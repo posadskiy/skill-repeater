@@ -49,16 +49,6 @@ endpoints:
     sensitive: false
 #end::prometheus[]
 
-email:
-  service:
-    url: ${EMAIL_SERVICE_URL:`http://email-template-service.local/email/template/send`}
-
-app:
-  public-url: ${APP_PUBLIC_URL:`https://repeaty.posadskiy.com`}
-
-reminders:
-  enabled: true
-
 otel:
   exporter:
     otlp:
@@ -73,13 +63,6 @@ logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}
     io.micronaut.data.query: INFO
-
-auth:
-  service:
-    url: ${AUTH_SERVICE_URL:`http://auth-service.local`}
-  client:
-    id: ${AUTH_SERVICE_CLIENT_ID:system}
-    secret: ${AUTH_SERVICE_CLIENT_SECRET}
 
 #tag::database[]
 datasources:

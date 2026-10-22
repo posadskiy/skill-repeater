@@ -13,7 +13,7 @@ micronaut:
   router:
     static-resources:
       swagger:
-        paths: classpath:META-INF/swagger/swagger/
+        paths: classpath:META-INF/swagger
         mapping: /swagger/**
       swagger-ui:
         paths: classpath:META-INF/swagger/views/swagger-ui
@@ -107,22 +107,5 @@ logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}
     io.micronaut.data.query: ${LOG_LEVEL_DATA_QUERY:INFO}
-
-auth:
-  service:
-    url: ${AUTH_SERVICE_URL:`http://auth-service.local`}
-  client:
-    id: ${AUTH_SERVICE_CLIENT_ID:system}
-    secret: ${AUTH_SERVICE_CLIENT_SECRET:}
-
-email:
-  service:
-    url: ${EMAIL_SERVICE_URL:`http://email-template-service.local/email/template/send`}
-
-app:
-  public-url: ${APP_PUBLIC_URL:`https://repeaty.posadskiy.com`}
-
-reminders:
-  enabled: true
 
 

@@ -16,7 +16,7 @@ class SwaggerUiTest {
     @Test
     void shouldServeOpenApiSpecification(@Client("/") HttpClient httpClient) {
         BlockingHttpClient client = httpClient.toBlocking();
-        assertDoesNotThrow(() -> client.exchange("/swagger/swagger.yml"));
+        assertDoesNotThrow(() -> client.exchange("/swagger/skill-repeater-service-0.3.0.yml"));
     }
 
     @Test

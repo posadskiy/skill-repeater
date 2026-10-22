@@ -129,9 +129,6 @@ jobs:
         
     - name: Build and Push to Docker Hub
       id: build
-      env:
-        GITHUB_TOKEN: ${{ secrets.DEPLOYMENT_GITHUB_TOKEN }}
-        GITHUB_USERNAME: posadskiy
       run: |
         echo "🏗️ Building application..."
         mvn clean package -DskipTests
@@ -143,8 +140,6 @@ jobs:
         
         echo "🐳 Building Docker image..."
         docker buildx build --platform linux/amd64 \
-          --build-arg GITHUB_TOKEN=${{ secrets.DEPLOYMENT_GITHUB_TOKEN }} \
-          --build-arg GITHUB_USERNAME=posadskiy \
           -f Dockerfile.prod \
           -t $IMAGE_TAG \
           -t $IMAGE_TAG_DATE \
@@ -241,7 +236,6 @@ jobs:
         export IMAGE_VERSION=$VERSION
         export IMAGE_TAG=$IMAGE_TAG
         export DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME
-        export GITHUB_USERNAME="posadskiy"
         
         # Create temporary skill-repeater-service.yaml with image substitution
         envsubst < deployment/skill-repeater-service.yaml | kubectl apply -f -

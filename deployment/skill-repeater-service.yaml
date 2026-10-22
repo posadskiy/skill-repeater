@@ -68,21 +68,6 @@ spec:
             secretKeyRef:
               name: skill-repeater-secrets
               key: JWT_GENERATOR_SIGNATURE_SECRET
-        - name: AUTH_SERVICE_URL
-          valueFrom:
-            configMapKeyRef:
-              name: skill-repeater-config
-              key: AUTH_SERVICE_URL
-        - name: AUTH_SERVICE_CLIENT_ID
-          valueFrom:
-            configMapKeyRef:
-              name: skill-repeater-config
-              key: AUTH_SERVICE_CLIENT_ID
-        - name: AUTH_SERVICE_CLIENT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: skill-repeater-secrets
-              key: AUTH_SERVICE_CLIENT_SECRET
         - name: AUTH_JWT_ISSUER
           valueFrom:
             configMapKeyRef:
@@ -93,16 +78,6 @@ spec:
             configMapKeyRef:
               name: skill-repeater-config
               key: AUTH_JWT_AUDIENCE
-        - name: APP_PUBLIC_URL
-          valueFrom:
-            configMapKeyRef:
-              name: skill-repeater-config
-              key: APP_PUBLIC_URL
-        - name: EMAIL_SERVICE_URL
-          valueFrom:
-            configMapKeyRef:
-              name: skill-repeater-config
-              key: EMAIL_SERVICE_URL
         - name: OTEL_SERVICE_NAME
           value: "skill-repeater-service"
         - name: OTEL_EXPORTER_OTLP_ENDPOINT

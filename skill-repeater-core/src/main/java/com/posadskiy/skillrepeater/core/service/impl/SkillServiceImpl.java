@@ -96,7 +96,7 @@ public class SkillServiceImpl implements SkillService {
     public List<Skill> due(String userId, int limit) {
         int safeLimit = PageRequests.dueLimit(limit);
         return skillRepository
-                .findByUserIdAndNextRepeatedLessThanEqualsOrderByNextRepeatedAscPriorityDesc(
+                .findByUserIdAndNextRepeatedLessThanEqualsOrderByNextRepeatedAscAndPriorityDesc(
                         userId,
                         OffsetDateTime.now(ZoneOffset.UTC),
                         Pageable.from(0, safeLimit))
