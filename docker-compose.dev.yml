@@ -18,9 +18,6 @@ services:
     build:
       context: skill-repeater-service
       dockerfile: Dockerfile
-      args:
-        GITHUB_TOKEN: ${GITHUB_TOKEN}
-        GITHUB_USERNAME: ${GITHUB_USERNAME}
     volumes:
       - ~/.m2:/root/.m2
     container_name: skill-repeater-service
@@ -33,9 +30,6 @@ services:
       DATASOURCE_USERNAME: ${SKILL_REPEATER_DATABASE_USER}
       DATASOURCE_PASSWORD: ${SKILL_REPEATER_DATABASE_PASSWORD}
       JWT_GENERATOR_SIGNATURE_SECRET: ${JWT_GENERATOR_SIGNATURE_SECRET}
-      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL:-http://auth-service.local}
-      AUTH_SERVICE_CLIENT_ID: ${AUTH_SERVICE_CLIENT_ID:-system}
-      AUTH_SERVICE_CLIENT_SECRET: ${AUTH_SERVICE_CLIENT_SECRET:-}
       JAEGER_SERVICE_NAME: skill-repeater-service
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
     logging:

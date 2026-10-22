@@ -1,6 +1,6 @@
 # Skill Repeater
 
-A spaced-repetition platform for tracking and reinforcing skills over time. Define skills with custom intervals and priorities, mark them as repeated to advance levels, and receive email reminders when repetitions are due.
+A spaced-repetition platform for tracking and reinforcing skills over time. Define skills with custom intervals and priorities, and review them when they are due.
 
 **Live at [repeaty.posadskiy.com](https://repeaty.posadskiy.com)**
 
@@ -10,8 +10,8 @@ A spaced-repetition platform for tracking and reinforcing skills over time. Defi
 - **Spaced repetition** — mark skills as repeated to advance the level and auto-calculate the next repetition date
 - **Priority system** — assign Low / Medium / High / Critical priority to skills
 - **Repetition history** — full audit trail of when each skill was practiced
-- **Email reminders** — scheduled background job detects upcoming repetitions and sends templated email notifications
-- **User settings** — profile and preference management
+- **Due queue** — the app shows skills that are ready to review
+- **User settings** — profile management
 - **JWT authentication** — secure API access via external auth service
 
 ## Architecture
@@ -28,22 +28,20 @@ A spaced-repetition platform for tracking and reinforcing skills over time. Defi
    │ Service  │  │ (external)│  │(external)│
    └────┬─────┘  └───────────┘  └──────────┘
         │
-   ┌────▼──────┐  ┌────────────────┐
-   │ PostgreSQL│  │ Email Template │
-   │           │  │ Service (ext.) │
-   └───────────┘  └────────────────┘
+   ┌────▼──────┐
+   │ PostgreSQL│
+   └───────────┘
 ```
 
 | Component | Port | Description |
 |-----------|------|-------------|
-| **skill-repeater-service** | 8210 | Micronaut REST API — skill CRUD, repeat actions, history, scheduled reminders |
+| **skill-repeater-service** | 8210 | Micronaut REST API — skill CRUD, reviews, and history |
 | **skill-repeater-front** | 3000 | React SPA — auth flows, skill management, repetition tracking, settings |
 | **PostgreSQL** | 5433 | Skill data, repetition history |
 
 **External services** (not in this repo):
 - `auth-service` — login, registration, JWT token management
 - `user-service` — user account creation and lookup
-- `email-template-service` — templated email delivery for repeat reminders
 
 ## Tech Stack
 
@@ -85,7 +83,7 @@ skill-repeater/
 │   └── .github/workflows/
 └── skill-repeater-service/         # Micronaut backend (Maven multi-module)
     ├── skill-repeater-api/         # DTOs, enums, validation
-    ├── skill-repeater-core/        # Domain logic, repositories, scheduler, notifications
+    ├── skill-repeater-core/        # Domain logic and repositories
     ├── skill-repeater-web/         # HTTP controllers, Flyway, security, app entry point
     ├── Dockerfile.prod
     ├── deployment/
@@ -117,8 +115,6 @@ export SKILL_REPEATER_DATABASE_NAME=skill_repeater_db
 export SKILL_REPEATER_DATABASE_USER=repeater
 export SKILL_REPEATER_DATABASE_PASSWORD=repeater
 export JWT_GENERATOR_SIGNATURE_SECRET=your-secret-here
-export GITHUB_USERNAME=your-github-username
-export GITHUB_TOKEN=your-github-token
 ```
 
 3. Start everything:
