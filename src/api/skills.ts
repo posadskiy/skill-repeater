@@ -5,8 +5,7 @@ import type {
   RepeatHistory,
   ReviewRating,
   Skill,
-  UpdateSkillInput,
-  UserSettings
+  UpdateSkillInput
 } from '../types/api';
 
 export const skillsApi = {
@@ -49,15 +48,5 @@ export const skillsApi = {
       params: { page: 0, size: 100 }
     });
     return response.data.items;
-  },
-
-  getSettings: async (): Promise<UserSettings> => {
-    const response = await apiClient.get<UserSettings>('/v0/settings');
-    return response.data;
-  },
-
-  saveSettings: async (settings: UserSettings): Promise<UserSettings> => {
-    const response = await apiClient.put<UserSettings>('/v0/settings', settings);
-    return response.data;
   }
 };

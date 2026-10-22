@@ -47,8 +47,15 @@ export IMAGE_VERSION=$VERSION
 envsubst < "$SERVICE_MANIFEST" | kubectl apply -f -
 
 echo ""
-echo "⏳ Waiting for deployment..."
-kubectl wait --for=condition=available --timeout=300s "deployment/$SERVICE_NAME" -n "$NAMESPACE" || true
+echo "⏳ Waiting for the rollout..."
+if ! kubectl rollout status "deployment/$SERVICE_NAME" -n "$NAMESPACE" --timeout=300s; then
+  echo "" >&2
+  echo "❌ $SERVICE_NAME did not become ready." >&2
+  kubectl get pods -n "$NAMESPACE" -l app=$SERVICE_NAME >&2
+  echo "💡 Logs:     kubectl logs deployment/$SERVICE_NAME -n $NAMESPACE" >&2
+  echo "💡 Roll back: kubectl rollout undo deployment/$SERVICE_NAME -n $NAMESPACE" >&2
+  exit 1
+fi
 
 echo ""
 echo "✅ $SERVICE_NAME deployment completed!"

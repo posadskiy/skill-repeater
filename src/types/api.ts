@@ -56,11 +56,6 @@ export interface Page<T> {
   total: number;
 }
 
-export interface UserSettings {
-  zoneId: string;
-  reminderHour: number;
-}
-
 export interface User {
   id: string;
   username: string;
