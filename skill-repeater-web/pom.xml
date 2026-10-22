@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.posadskiy.skillrepeater</groupId>
         <artifactId>skill-repeater-service</artifactId>
-        <version>0.4.0</version>
+        <version>0.5.0</version>
     </parent>
 
     <artifactId>skill-repeater-web</artifactId>
