@@ -1,7 +1,9 @@
 import { Container, Title } from '@mantine/core';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { UserService } from 'user-component-react';
 import { USER_URL } from '../api/client';
+
+const accountTheme = createTheme();
 
 export function UserSettings() {
   const token = localStorage.getItem('token');
@@ -22,7 +24,7 @@ export function UserSettings() {
   return (
     <Container size="sm" px="xs" py="md">
       <Title order={2} mb="md">Account</Title>
-      <ThemeProvider theme={{}}>
+      <ThemeProvider theme={accountTheme}>
         <UserService
           apiUrl={USER_URL!}
           userId={userId}
