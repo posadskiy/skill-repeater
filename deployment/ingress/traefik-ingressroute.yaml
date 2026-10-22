@@ -8,7 +8,8 @@ spec:
     - websecure
   routes:
     # Skill Repeater Service
-    - match: Host(`api.posadskiy.com`) && PathPrefix(`/skill-repeater`)
+    # Docs and metrics stay on the cluster network. Prometheus scrapes the Service directly.
+    - match: Host(`api.posadskiy.com`) && PathPrefix(`/skill-repeater`) && !PathPrefix(`/skill-repeater/prometheus`) && !PathPrefix(`/skill-repeater/swagger`) && !PathPrefix(`/skill-repeater/openapi`)
       kind: Rule
       services:
         - name: skill-repeater-service
@@ -62,11 +63,6 @@ spec:
     accessControlAllowOriginList:
       - https://repeaty.posadskiy.com
     accessControlMaxAge: 1728000
-    customRequestHeaders:
-      X-Forwarded-Proto: https
-      X-Real-IP: ""
-      X-Forwarded-For: ""
-      X-Forwarded-Host: ""
 
 ---
 apiVersion: traefik.io/v1alpha1

@@ -10,4 +10,10 @@ data:
   SKILL_REPEATER_DATASOURCE_URL: "jdbc:postgresql://shared-posadskiy.e.aivencloud.com:25370/skill_repeater_db?sslmode=require"
   GITHUB_USERNAME: "posadskiy"
   JAEGER_ENDPOINT: "http://jaeger-collector.observability-stack:14268/api/traces"
+  AUTH_SERVICE_URL: "http://auth-service.local"
+  AUTH_SERVICE_CLIENT_ID: "system"
+  AUTH_JWT_ISSUER: "https://auth.posadskiy.com"
+  AUTH_JWT_AUDIENCE: "api.posadskiy.com"
+  APP_PUBLIC_URL: "https://repeaty.posadskiy.com"
+  EMAIL_SERVICE_URL: "http://email-template-service.local/email/template/send"
 
