@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.posadskiy.skillrepeater</groupId>
         <artifactId>skill-repeater-service</artifactId>
-        <version>0.5.0</version>
+        <version>0.6.0</version>
     </parent>
 
     <artifactId>skill-repeater-api</artifactId>
@@ -94,6 +94,10 @@
                         <path>
                             <groupId>io.micronaut.openapi</groupId>
                             <artifactId>micronaut-openapi</artifactId>
+                        </path>
+                        <path>
+                            <groupId>io.micronaut.validation</groupId>
+                            <artifactId>micronaut-validation-processor</artifactId>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

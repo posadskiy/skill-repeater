@@ -1,11 +1,13 @@
 package com.posadskiy.skillrepeater.api.validation;
 
+import jakarta.inject.Singleton;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
 
+@Singleton
 public class PeriodValidator implements ConstraintValidator<SkillPeriod, ChronoUnit> {
 
     private static final Set<ChronoUnit> ALLOWED = Set.of(
