@@ -15,26 +15,51 @@ export function priorityLabel(p: Priority | undefined): string {
   return PRIORITY_SELECT_OPTIONS.find((o) => o.value === p)?.label ?? p;
 }
 
+export type ReviewRating = 'AGAIN' | 'HARD' | 'GOOD' | 'EASY';
+
 export interface Skill {
-  id: number;
+  id: string;
   name: string;
-  description: string;
+  description: string | null;
   level: number;
-  lastRepeated: string;
-  nextRepeated: string;
-  userId: number;
+  lastRepeated: string | null;
+  nextRepeated: string | null;
+  userId: string;
   period: Period;
   number: number;
-  /** Omitted on older API responses until backfilled */
-  priority?: Priority;
+  priority: Priority;
+  intervalSeconds?: number | null;
+  learnNow?: boolean | null;
 }
 
-/** Create always sends priority from the form (required by backend entity). */
-export type CreateSkillInput = Omit<Skill, 'id' | 'lastRepeated' | 'nextRepeated' | 'priority'> & {
+export type CreateSkillInput = {
+  name: string;
+  description: string;
+  period: Period;
+  number: number;
+  priority: Priority;
+  learnNow?: boolean;
+};
+
+export type UpdateSkillInput = {
+  name: string;
+  description: string;
+  period: Period;
+  number: number;
   priority: Priority;
 };
 
-export type UpdateSkillInput = Partial<CreateSkillInput> & { id: number };
+export interface Page<T> {
+  items: T[];
+  page: number;
+  size: number;
+  total: number;
+}
+
+export interface UserSettings {
+  zoneId: string;
+  reminderHour: number;
+}
 
 export interface User {
   id: string;
@@ -49,8 +74,12 @@ export interface AuthResponse {
 }
 
 export interface RepeatHistory {
-  id: number;
-  skillId: number;
+  id: string;
+  skillId: string;
+  userId: string;
+  comment: string | null;
   repeatedAt: string;
-  nextRepeated: string;
+  rating: ReviewRating | null;
+  intervalSeconds: number | null;
+  level: number | null;
 } 

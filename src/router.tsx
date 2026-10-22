@@ -14,6 +14,7 @@ import { withFaroRouterInstrumentation } from '@grafana/faro-react';
 import { CreateSkill } from './pages/CreateSkill';
 import { EditSkill } from './pages/EditSkill';
 import { Login } from './pages/Login';
+import { OAuthCallback } from './pages/OAuthCallback';
 import { Register } from './pages/Register';
 import { SkillDetails } from './pages/SkillDetails';
 import { Skills } from './pages/Skills';
@@ -116,6 +117,7 @@ const routes = createRoutesFromElements(
   <>
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
+    <Route path="/oauth/callback" element={<OAuthCallback />} />
     <Route
       path="/"
       element={

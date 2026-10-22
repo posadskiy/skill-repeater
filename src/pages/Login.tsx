@@ -1,65 +1,31 @@
-import { useState } from 'react';
-import { Container, Paper, Title, TextInput, PasswordInput, Button, Text, Anchor, Stack } from '@mantine/core';
-import { useNavigate, Link } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
-import { authApi } from '../api/auth';
+import { Container } from '@mantine/core';
+import { Login as AuthLogin } from 'auth-component-react';
+import { useNavigate } from 'react-router-dom';
+import { saveSession } from '../api/auth';
+import { AUTH_URL } from '../api/client';
+
+function serviceUrl(base: string, path: string) {
+  return `${base.replace(/\/$/, '')}${path}`;
+}
 
 export function Login() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-
-  const loginMutation = useMutation({
-    mutationFn: () => authApi.login(username, password),
-    onSuccess: () => {
-      navigate('/');
-    },
-    onError: (error) => {
-      console.error('Login failed:', error);
-    }
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    loginMutation.mutate();
-  };
 
   return (
     <Container size="xs" h="100vh" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <Paper radius="md" p="xl" withBorder style={{ width: '100%' }}>
-        <Title ta="center" mb="md">Welcome back!</Title>
-        <Text ta="center" c="dimmed" mb="xl">
-          Don't have an account yet?{' '}
-          <Anchor component={Link} to="/register" size="sm">
-            Create account
-          </Anchor>
-        </Text>
-
-        <form onSubmit={handleSubmit}>
-          <Stack>
-            <TextInput
-              required
-              label="Username"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              error={loginMutation.isError ? 'Invalid credentials' : null}
-            />
-
-            <PasswordInput
-              required
-              label="Password"
-              placeholder="Your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <Button type="submit" loading={loginMutation.isPending} fullWidth mt="xl">
-              Sign in
-            </Button>
-          </Stack>
-        </form>
-      </Paper>
+      <AuthLogin
+        apiUrl={serviceUrl(AUTH_URL!, '/login')}
+        oauthApiUrl={AUTH_URL!.replace(/\/$/, '')}
+        oauthReturnTo="/oauth/callback"
+        providers={['apple', 'google']}
+        showRegisterLink
+        onSwitchToRegister={() => navigate('/register')}
+        onSuccess={(response) => {
+          saveSession(response.access_token, response.expires_in);
+          navigate('/');
+        }}
+        style={{ width: '100%' }}
+      />
     </Container>
   );
-} 
+}

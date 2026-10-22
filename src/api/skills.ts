@@ -1,43 +1,63 @@
 import { apiClient } from './client';
-import type { Skill, RepeatHistory, CreateSkillInput, UpdateSkillInput } from '../types/api';
+import type {
+  CreateSkillInput,
+  Page,
+  RepeatHistory,
+  ReviewRating,
+  Skill,
+  UpdateSkillInput,
+  UserSettings
+} from '../types/api';
 
 export const skillsApi = {
-  getAll: async (userId: number): Promise<Skill[]> => {
-    const response = await apiClient.get<Skill[]>(`/v0/skill/get-all/${userId}`);
+  getAll: async (): Promise<Skill[]> => {
+    const response = await apiClient.get<Page<Skill>>('/v0/skills', { params: { page: 0, size: 100 } });
+    return response.data.items;
+  },
+
+  due: async (): Promise<Skill[]> => {
+    const response = await apiClient.get<Skill[]>('/v0/skills/due');
     return response.data;
   },
 
-  getById: async (id: number): Promise<Skill> => {
-    const response = await apiClient.get<Skill>(`/v0/skill/get/${id}`);
+  getById: async (id: string): Promise<Skill> => {
+    const response = await apiClient.get<Skill>(`/v0/skills/${id}`);
     return response.data;
   },
 
   add: async (skill: CreateSkillInput): Promise<Skill> => {
-    const response = await apiClient.post<Skill>('/v0/skill/add', skill);
+    const response = await apiClient.post<Skill>('/v0/skills', skill);
     return response.data;
   },
 
-  addAll: async (skills: CreateSkillInput[]): Promise<Skill[]> => {
-    const response = await apiClient.post<Skill[]>('/v0/skill/add-all', skills);
+  update: async (id: string, skill: UpdateSkillInput): Promise<Skill> => {
+    const response = await apiClient.put<Skill>(`/v0/skills/${id}`, skill);
     return response.data;
   },
 
-  update: async (skill: UpdateSkillInput): Promise<Skill> => {
-    const response = await apiClient.post<Skill>('/v0/skill/edit', skill);
+  delete: async (id: string): Promise<void> => {
+    await apiClient.delete(`/v0/skills/${id}`);
+  },
+
+  review: async (id: string, rating: ReviewRating): Promise<Skill> => {
+    const response = await apiClient.post<Skill>(`/v0/skills/${id}/reviews`, { rating });
     return response.data;
   },
 
-  delete: async (id: number): Promise<void> => {
-    await apiClient.delete(`/v0/skill/delete/${id}`);
+  getHistory: async (skillId: string): Promise<RepeatHistory[]> => {
+    const response = await apiClient.get<Page<RepeatHistory>>(`/v0/skills/${skillId}/history`, {
+      params: { page: 0, size: 100 }
+    });
+    return response.data.items;
   },
 
-  repeat: async (id: number): Promise<Skill> => {
-    const response = await apiClient.post<Skill>(`/v0/skill/repeat/${id}`);
+  getSettings: async (): Promise<UserSettings> => {
+    const response = await apiClient.get<UserSettings>('/v0/settings');
     return response.data;
   },
 
-  getHistory: async (skillId: number): Promise<RepeatHistory[]> => {
-    const response = await apiClient.get<RepeatHistory[]>(`/v0/repeat-history/skill/${skillId}`);
+  saveSettings: async (settings: UserSettings): Promise<UserSettings> => {
+    const response = await apiClient.put<UserSettings>('/v0/settings', settings);
     return response.data;
   }
-}; 
+};

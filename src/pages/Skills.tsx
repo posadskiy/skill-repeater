@@ -6,11 +6,17 @@ import { priorityLabel } from '../types/api';
 
 export function Skills() {
   const navigate = useNavigate();
-  const userId = Number(localStorage.getItem('userId'));
+  const userId = localStorage.getItem('userId');
+
+  const { data: due } = useQuery({
+    queryKey: ['skills-due', userId],
+    queryFn: () => skillsApi.due(),
+    enabled: !!userId
+  });
 
   const { data: skills, isLoading } = useQuery({
     queryKey: ['skills', userId],
-    queryFn: () => skillsApi.getAll(userId),
+    queryFn: () => skillsApi.getAll(),
     enabled: !!userId
   });
 
@@ -38,6 +44,20 @@ export function Skills() {
           <Button onClick={() => navigate('/skills/create')}>Create Skill</Button>
         </Group>
 
+        <Title order={3}>Due now ({due?.length ?? 0})</Title>
+        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+          {due?.map((skill) => (
+            <Card key={`due-${skill.id}`} withBorder>
+              <Stack gap="xs">
+                <Title order={4}>{skill.name}</Title>
+                <Text size="sm" c="dimmed">Priority: {priorityLabel(skill.priority)}</Text>
+                <Button variant="light" onClick={() => navigate(`/skills/${skill.id}`)}>Review</Button>
+              </Stack>
+            </Card>
+          ))}
+        </SimpleGrid>
+
+        <Title order={3}>All skills</Title>
         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
           {skills?.map((skill) => (
             <Card key={skill.id} withBorder>
@@ -46,7 +66,7 @@ export function Skills() {
                 <Text size="sm" c="dimmed">Level: {skill.level} · Priority: {priorityLabel(skill.priority)}</Text>
                 <Text size="sm" c="dimmed" lineClamp={2}>{skill.description}</Text>
                 <Text size="sm" c="dimmed">
-                  Next: {new Date(skill.nextRepeated).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} at {new Date(skill.nextRepeated).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                  Next: {skill.nextRepeated ? new Date(skill.nextRepeated).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '—'}
                 </Text>
                 <Group>
                   <Button variant="light" onClick={() => navigate(`/skills/${skill.id}`)}>

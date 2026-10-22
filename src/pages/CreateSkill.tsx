@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Container, Paper, Title, TextInput, Textarea, Select, Button, Stack, Text, NumberInput, Group } from '@mantine/core';
+import { Container, Paper, Title, TextInput, Textarea, Select, Button, Stack, Text, NumberInput, Group, Checkbox } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { skillsApi } from '../api/skills';
@@ -8,23 +8,23 @@ import { PRIORITY_SELECT_OPTIONS, type Period, type Priority } from '../types/ap
 export function CreateSkill() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const userId = Number(localStorage.getItem('userId'));
+  const userId = localStorage.getItem('userId');
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [period, setPeriod] = useState<Period>('DAYS');
   const [number, setNumber] = useState<number | ''>(1);
   const [priority, setPriority] = useState<Priority>('MEDIUM');
+  const [learnNow, setLearnNow] = useState(false);
 
   const addMutation = useMutation({
     mutationFn: () => skillsApi.add({
       name,
       description,
-      level: 1,
-      userId,
       period,
       number: number === '' ? 1 : number,
-      priority
+      priority,
+      learnNow
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['skills'] });
@@ -103,6 +103,13 @@ export function CreateSkill() {
               data={PRIORITY_SELECT_OPTIONS}
               value={priority}
               onChange={(value) => setPriority((value as Priority) ?? 'MEDIUM')}
+            />
+
+            <Checkbox
+              label="Learn now"
+              description="The first review is due immediately"
+              checked={learnNow}
+              onChange={(event) => setLearnNow(event.currentTarget.checked)}
             />
 
             <Button type="submit" loading={addMutation.isPending} mt="md">

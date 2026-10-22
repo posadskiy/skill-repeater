@@ -9,12 +9,12 @@ export function EditSkill() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const userId = Number(localStorage.getItem('userId'));
+  const userId = localStorage.getItem('userId');
   const [deleteModalOpened, setDeleteModalOpened] = useState(false);
 
   const { data: skill, isLoading } = useQuery({
     queryKey: ['skill', id],
-    queryFn: () => skillsApi.getById(Number(id)),
+    queryFn: () => skillsApi.getById(id!),
     enabled: !!id
   });
 
@@ -27,7 +27,7 @@ export function EditSkill() {
   useEffect(() => {
     if (skill) {
       setName(skill.name);
-      setDescription(skill.description);
+      setDescription(skill.description ?? '');
       setPeriod(skill.period);
       setNumber(skill.number);
       setPriority(skill.priority ?? 'MEDIUM');
@@ -35,12 +35,9 @@ export function EditSkill() {
   }, [skill]);
 
   const updateMutation = useMutation({
-    mutationFn: () => skillsApi.update({
-      id: Number(id),
+    mutationFn: () => skillsApi.update(id!, {
       name,
       description,
-      level: skill?.level || 1,
-      userId,
       period,
       number: number === '' ? 1 : number,
       priority
@@ -52,7 +49,7 @@ export function EditSkill() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => skillsApi.delete(Number(id)),
+    mutationFn: () => skillsApi.delete(id!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['skills'] });
       navigate('/skills');

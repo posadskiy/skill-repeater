@@ -1,21 +1,21 @@
-import { apiClient, authClient } from './client';
+import { apiClient, authClient, subjectOf } from './client';
 import type { AuthResponse, User } from '../types/api';
 
 const SESSION_EXPIRY_KEY = 'session_expiry';
 
+export function saveSession(accessToken: string, expiresIn?: number) {
+  localStorage.setItem('token', accessToken);
+  localStorage.setItem('userId', subjectOf(accessToken));
+  if (expiresIn != null) {
+    localStorage.setItem(SESSION_EXPIRY_KEY, String(Date.now() + expiresIn * 1000));
+  }
+}
+
 export const authApi = {
   login: async (username: string, password: string): Promise<AuthResponse> => {
     const response = await authClient.post<AuthResponse>('/login', { username, password });
-    const { access_token, expires_in, username: userId } = response.data;
-    
-    // Store the token and user ID
-    localStorage.setItem('token', access_token);
-    localStorage.setItem('userId', userId);
-    
-    // Set session expiry
-    const expiryTime = Date.now() + (expires_in * 1000);
-    localStorage.setItem(SESSION_EXPIRY_KEY, expiryTime.toString());
-    
+    const { access_token, expires_in } = response.data;
+    saveSession(access_token, expires_in);
     return response.data;
   },
 
