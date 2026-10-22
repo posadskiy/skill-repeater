@@ -1,23 +1,26 @@
 package com.posadskiy.skillrepeater.core.service.impl;
 
+import com.posadskiy.skillrepeater.core.exception.SkillNotFoundException;
 import com.posadskiy.skillrepeater.core.mapper.entity.SkillEntityMapper;
+import com.posadskiy.skillrepeater.core.model.PageResult;
 import com.posadskiy.skillrepeater.core.model.Skill;
+import com.posadskiy.skillrepeater.core.service.IntervalMath;
+import com.posadskiy.skillrepeater.core.service.PageRequests;
 import com.posadskiy.skillrepeater.core.service.SkillService;
 import com.posadskiy.skillrepeater.core.storage.db.SkillRepository;
 import com.posadskiy.skillrepeater.core.storage.db.entity.SkillEntity;
-import io.micronaut.http.HttpStatus;
-import io.micronaut.http.exceptions.HttpStatusException;
+import io.micronaut.data.model.Pageable;
 import jakarta.inject.Singleton;
-import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Objects;
 
 @Singleton
-@NoArgsConstructor
 public class SkillServiceImpl implements SkillService {
-    private SkillRepository skillRepository;
-    private SkillEntityMapper skillEntityMapper;
+    private final SkillRepository skillRepository;
+    private final SkillEntityMapper skillEntityMapper;
 
     public SkillServiceImpl(SkillRepository skillRepository, SkillEntityMapper skillEntityMapper) {
         this.skillRepository = skillRepository;
@@ -25,44 +28,49 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
-    public Skill addSkill(Skill skill) {
-        final SkillEntity skillEntity = skillEntityMapper.mapToEntity(skill);
+    public Skill addSkill(Skill skill, boolean learnNow) {
+        long base = IntervalMath.seconds(skill.getNumber(), skill.getPeriod());
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        skill.setLevel(0);
+        skill.setLastRepeated(null);
+        skill.setIntervalSeconds(base);
+        skill.setNextRepeated(learnNow ? now : now.plusSeconds(base));
 
-        skillEntity.setLastRepeated(LocalDateTime.now());
-        skillEntity.setNextRepeated(LocalDateTime.now());
-
-        return skillEntityMapper.mapFromEntity(
-            skillRepository.save(
-                skillEntity
-            ));
+        SkillEntity entity = skillEntityMapper.mapToEntity(skill);
+        entity.setLevel(0);
+        entity.setIntervalSeconds(base);
+        entity.setLastRepeated(null);
+        entity.setNextRepeated(skill.getNextRepeated());
+        return skillEntityMapper.mapFromEntity(skillRepository.save(entity));
     }
 
     @Override
-    public Skill editSkill(Skill skill) {
-        var loaded = get(skill.getId());
-        
-        loaded.setName(skill.getName());
-        loaded.setDescription(skill.getDescription());
-        loaded.setPeriod(skill.getPeriod());
-        loaded.setNumber(skill.getNumber());
-        
+    public Skill editSkill(Skill incoming) {
+        Skill loaded = get(incoming.getId());
+        boolean intervalChanged = !Objects.equals(loaded.getNumber(), incoming.getNumber())
+                || loaded.getPeriod() != incoming.getPeriod();
+        loaded.setName(incoming.getName());
+        loaded.setDescription(incoming.getDescription());
+        loaded.setPeriod(incoming.getPeriod());
+        loaded.setNumber(incoming.getNumber());
+        loaded.setPriority(incoming.getPriority());
+        if (intervalChanged) {
+            long base = IntervalMath.seconds(incoming.getNumber(), incoming.getPeriod());
+            loaded.setIntervalSeconds(base);
+            OffsetDateTime anchor = loaded.getLastRepeated() != null
+                    ? loaded.getLastRepeated()
+                    : OffsetDateTime.now(ZoneOffset.UTC);
+            loaded.setNextRepeated(anchor.plusSeconds(base));
+        }
         return skillEntityMapper.mapFromEntity(
-            skillRepository.update(
-                skillEntityMapper.mapToEntity(loaded)
-            ));
-    }
-
-    @Override
-    public void deleteSkill(Skill skill) {
-        skillRepository.delete(
-            skillEntityMapper.mapToEntity(skill)
+                skillRepository.update(skillEntityMapper.mapToEntity(loaded))
         );
     }
 
     @Override
     public void deleteById(String id) {
         if (!skillRepository.existsById(id)) {
-            throw new HttpStatusException(HttpStatus.NOT_FOUND, "Skill not found with id: " + id);
+            throw new SkillNotFoundException();
         }
         skillRepository.deleteById(id);
     }
@@ -73,32 +81,34 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
-    public void repeatSkill(String id) {
-        var loaded = get(id);
-
-        loaded.setLastRepeated(LocalDateTime.now());
-        loaded.setNextRepeated(loaded.getLastRepeated().plus(loaded.getNumber(), loaded.getPeriod()));
-        loaded.setLevel(loaded.getLevel() + 1);
-
-        skillRepository.update(
-            skillEntityMapper.mapToEntity(loaded)
-        );
+    public PageResult<Skill> pageByUser(String userId, int page, int size) {
+        int safePage = PageRequests.page(page);
+        int safeSize = PageRequests.size(size);
+        List<Skill> items = skillRepository
+                .findByUserIdOrderByNextRepeatedAsc(userId, Pageable.from(safePage, safeSize))
+                .stream()
+                .map(skillEntityMapper::mapFromEntity)
+                .toList();
+        return new PageResult<>(items, safePage, safeSize, skillRepository.countByUserId(userId));
     }
 
-    public List<Skill> getAllByUser(String userId) {
+    @Override
+    public List<Skill> due(String userId, int limit) {
+        int safeLimit = PageRequests.dueLimit(limit);
         return skillRepository
-            .findByUserId(userId)
-            .stream()
-            .map(skillEntityMapper::mapFromEntity)
-            .toList();
+                .findByUserIdAndNextRepeatedLessThanEqualsOrderByNextRepeatedAscPriorityDesc(
+                        userId,
+                        OffsetDateTime.now(ZoneOffset.UTC),
+                        Pageable.from(0, safeLimit))
+                .stream()
+                .map(skillEntityMapper::mapFromEntity)
+                .toList();
     }
 
     @Override
     public Skill get(String id) {
-        return skillEntityMapper
-            .mapFromEntity(
-                skillRepository
-                    .findById(id)
-                    .orElseThrow(() -> new HttpStatusException(HttpStatus.NOT_FOUND, "Skill not found with id: " + id)));
+        return skillEntityMapper.mapFromEntity(
+                skillRepository.findById(id).orElseThrow(SkillNotFoundException::new)
+        );
     }
 }

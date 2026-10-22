@@ -8,7 +8,7 @@ import io.micronaut.http.client.annotation.Client;
 
 import static io.micronaut.http.HttpHeaders.AUTHORIZATION;
 
-@Client("http://email-template-service.local/email/template/send")
+@Client("${email.service.url}")
 public interface SendEmailClient extends SendEmailOperations {
 
     @Post("base")

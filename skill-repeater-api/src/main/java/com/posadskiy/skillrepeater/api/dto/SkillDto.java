@@ -1,48 +1,47 @@
 package com.posadskiy.skillrepeater.api.dto;
 
+import com.posadskiy.skillrepeater.api.model.Priority;
+import com.posadskiy.skillrepeater.api.validation.SkillPeriod;
 import io.micronaut.core.annotation.Introspected;
-import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.serde.annotation.Serdeable;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import com.posadskiy.skillrepeater.api.model.Priority;
 
 @Serdeable
 @Introspected
-@Schema(description = "Data transfer object representing a skill that needs to be repeated")
+@Schema(description = "A skill practiced on a growing interval")
 public record SkillDto(
-    @Schema(description = "Unique identifier of the skill", example = "123e4567-e89b-12d3-a456-426614174000")
-    @Nullable String id,
+        @Schema(description = "Skill id")
+        @Nullable String id,
 
-    @Schema(description = "ID of the user who owns this skill", example = "1")
-    @NonNull @NotBlank String userId,
+        @Schema(description = "Owner id. Ignored on write; the token subject is stored.")
+        @Nullable String userId,
 
-    @Schema(description = "Name of the skill", example = "Java Programming")
-    @NonNull @NotBlank String name,
+        @Schema(description = "Skill name", example = "Java")
+        @NotBlank String name,
 
-    @Schema(description = "Optional description of the skill", example = "Core Java concepts and best practices")
-    @Nullable String description,
+        @Schema(description = "What to practice")
+        @Nullable String description,
 
-    @Schema(description = "Repetition period (e.g., 'HOURS', 'DAYS', 'WEEKS', 'MONTHS', 'YEARS')", example = "DAYS")
-    @NonNull @NotBlank ChronoUnit period,
+        @Schema(description = "Starting interval unit", example = "DAYS")
+        @NotNull @SkillPeriod ChronoUnit period,
 
-    @Schema(description = "Number of repetitions or specific interval", example = "3")
-    @NonNull @NotBlank String number,
+        @Schema(description = "Starting interval count", example = "3")
+        @NotNull @Min(1) Integer number,
 
-    @Schema(description = "Date and time of the last repetition", example = "2024-03-20T10:30:00Z")
-    @Nullable Date lastRepeated,
-    
-    @Schema(description = "Date and time of the next repetition", example = "2024-04-20T10:30:00Z")
-    @Nullable Date nextRepeated,
+        @Nullable OffsetDateTime lastRepeated,
+        @Nullable OffsetDateTime nextRepeated,
+        @Nullable Integer level,
+        @NotNull Priority priority,
+        @Nullable Long intervalSeconds,
 
-    @Schema(description = "Current level of skill mastery (1-5)", example = "3", minimum = "1", maximum = "5")
-    @Nullable Integer level,
-
-    @Schema(description = "Priority level of the skill (LOW, MEDIUM, HIGH, CRITICAL)", example = "MEDIUM")
-    @Nullable Priority priority
+        @Schema(description = "When true, the first review is due immediately")
+        @Nullable Boolean learnNow
 ) {
 }

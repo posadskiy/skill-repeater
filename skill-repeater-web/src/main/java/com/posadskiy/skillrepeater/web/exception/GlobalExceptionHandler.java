@@ -1,6 +1,8 @@
 package com.posadskiy.skillrepeater.web.exception;
 
 import com.posadskiy.skillrepeater.core.exception.AuthException;
+import com.posadskiy.skillrepeater.core.exception.ReviewConflictException;
+import com.posadskiy.skillrepeater.core.exception.SkillNotFoundException;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
@@ -67,6 +69,18 @@ public class GlobalExceptionHandler {
         );
 
         return HttpResponse.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @Error(global = true)
+    public HttpResponse<ErrorResponse> handleSkillNotFound(SkillNotFoundException ex, HttpRequest request) {
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), "NOT_FOUND", request.getPath());
+        return HttpResponse.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @Error(global = true)
+    public HttpResponse<ErrorResponse> handleReviewConflict(ReviewConflictException ex, HttpRequest request) {
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), "CONFLICT", request.getPath());
+        return HttpResponse.status(HttpStatus.CONFLICT).body(error);
     }
 
     @Error(global = true)

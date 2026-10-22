@@ -1,13 +1,10 @@
 package com.posadskiy.skillrepeater.core.service;
 
+import com.posadskiy.skillrepeater.core.model.PageResult;
 import com.posadskiy.skillrepeater.core.model.RepeatHistory;
 
-import java.util.List;
-
 public interface RepeatHistoryService {
-    void repeatSkill(String id);
+    PageResult<RepeatHistory> pageBySkill(String skillId, int page, int size);
 
-    List<RepeatHistory> getBySkillId(String skillId);
-
-    List<RepeatHistory> getByUserId(String userId);
+    PageResult<RepeatHistory> pageByUser(String userId, int page, int size);
 }

@@ -1,54 +1,22 @@
 package com.posadskiy.skillrepeater.core.model;
 
+import com.posadskiy.skillrepeater.api.model.ReviewRating;
 import io.micronaut.core.annotation.Introspected;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
+@Getter
+@Setter
 @Introspected
 public class RepeatHistory {
     private String id;
     private String skillId;
     private String userId;
     private String comment;
-    private LocalDateTime repeatedAt;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getSkillId() {
-        return skillId;
-    }
-
-    public void setSkillId(String skillId) {
-        this.skillId = skillId;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public LocalDateTime getRepeatedAt() {
-        return repeatedAt;
-    }
-
-    public void setRepeatedAt(LocalDateTime repeatedAt) {
-        this.repeatedAt = repeatedAt;
-    }
+    private OffsetDateTime repeatedAt;
+    private ReviewRating rating;
+    private Long intervalSeconds;
+    private Integer level;
 }

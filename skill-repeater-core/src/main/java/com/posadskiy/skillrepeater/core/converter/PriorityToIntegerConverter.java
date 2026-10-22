@@ -13,7 +13,7 @@ public class PriorityToIntegerConverter implements TypeConverter<Priority, Integ
     @Override
     public Optional<Integer> convert(Priority value, Class<Integer> targetType, ConversionContext context) {
         if (value == null) {
-            return Optional.of(Priority.MEDIUM.getValue());
+            return Optional.empty();
         }
         return Optional.of(value.getValue());
     }

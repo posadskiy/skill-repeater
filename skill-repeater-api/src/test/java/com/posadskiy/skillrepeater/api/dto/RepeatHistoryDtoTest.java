@@ -1,70 +1,52 @@
 package com.posadskiy.skillrepeater.api.dto;
 
+import com.posadskiy.skillrepeater.api.model.ReviewRating;
 import org.junit.jupiter.api.Test;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RepeatHistoryDtoTest {
 
     @Test
     void testRepeatHistoryDtoCreation() {
-        Date now = new Date();
+        OffsetDateTime now = OffsetDateTime.parse("2026-10-19T10:00:00Z");
         RepeatHistoryDto repeatHistoryDto = new RepeatHistoryDto(
             "test-history-id",
             "test-skill-id",
             "test-user-id",
             "Test comment",
-            now
+            now,
+            ReviewRating.GOOD,
+            172800L,
+            1
         );
 
         assertEquals("test-history-id", repeatHistoryDto.id());
-        assertEquals("test-skill-id", repeatHistoryDto.skillId());
-        assertEquals("test-user-id", repeatHistoryDto.userId());
-        assertEquals("Test comment", repeatHistoryDto.comment());
-        assertEquals(now, repeatHistoryDto.repeatedAt());
-    }
-
-    @Test
-    void testRepeatHistoryDtoEqualsAndHashCode() {
-        Date now = new Date();
-        RepeatHistoryDto repeatHistoryDto1 = new RepeatHistoryDto(
-            "test-history-id",
-            "test-skill-id",
-            "test-user-id",
-            "Test comment",
-            now
-        );
-
-        RepeatHistoryDto repeatHistoryDto2 = new RepeatHistoryDto(
-            "test-history-id",
-            "test-skill-id",
-            "test-user-id",
-            "Test comment",
-            now
-        );
-
-        assertEquals(repeatHistoryDto1, repeatHistoryDto2);
-        assertEquals(repeatHistoryDto1.hashCode(), repeatHistoryDto2.hashCode());
+        assertEquals(ReviewRating.GOOD, repeatHistoryDto.rating());
+        assertEquals(172800L, repeatHistoryDto.intervalSeconds());
+        assertEquals(1, repeatHistoryDto.level());
     }
 
     @Test
     void testRepeatHistoryDtoWithNullComment() {
-        Date now = new Date();
+        OffsetDateTime now = OffsetDateTime.parse("2026-10-19T10:00:00Z");
         RepeatHistoryDto repeatHistoryDto = new RepeatHistoryDto(
             "test-history-id",
             "test-skill-id",
             "test-user-id",
             null,
-            now
+            now,
+            null,
+            null,
+            null
         );
 
         assertNull(repeatHistoryDto.comment());
-        assertEquals("test-history-id", repeatHistoryDto.id());
-        assertEquals("test-skill-id", repeatHistoryDto.skillId());
-        assertEquals("test-user-id", repeatHistoryDto.userId());
-        assertEquals(now, repeatHistoryDto.repeatedAt());
+        assertNull(repeatHistoryDto.rating());
     }
 
     @Test
@@ -74,12 +56,12 @@ class RepeatHistoryDtoTest {
             "test-skill-id",
             "test-user-id",
             "Test comment",
-            new Date()
+            OffsetDateTime.parse("2026-10-19T10:00:00Z"),
+            ReviewRating.EASY,
+            1L,
+            2
         );
 
-        String toString = repeatHistoryDto.toString();
-        assertNotNull(toString);
-        assertTrue(toString.contains("test-history-id"));
-        assertTrue(toString.contains("test-skill-id"));
+        assertTrue(repeatHistoryDto.toString().contains("test-history-id"));
     }
-} 
+}

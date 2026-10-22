@@ -5,69 +5,67 @@ Micronaut backend for the Skill Repeater platform. Provides a REST API for manag
 ## Features
 
 - **Skill CRUD** — create, read, update, and delete skills per user
-- **Spaced repetition engine** — on repeat, advances skill level and calculates next repetition date based on configurable period and interval
-- **Repetition history** — persistent log of every repeat action per skill and user
-- **Scheduled reminders** — background cron job detects skills due for repetition and sends email notifications via external email template service
-- **OpenAPI / Swagger UI** — auto-generated API documentation
+- **Spaced repetition engine** — a review is rated Again, Hard, Good, or Easy. Good and Easy raise the level and grow the interval; Again returns to the starting interval.
+- **Repetition history** — each review stores the rating, the interval just applied, and the level
+- **Scheduled reminders** — one job every 15 minutes emails due skills once, after the user's local reminder hour
+- **OpenAPI / Swagger UI** — auto-generated API documentation in development
 - **Distributed tracing** — Jaeger integration for request tracing
 - **Metrics** — Prometheus endpoint for monitoring
-- **JWT security** — all endpoints require authenticated Bearer tokens
+- **JWT security** — endpoints require a bearer token whose subject owns the skill. Swagger is disabled in production, and Prometheus is not routed on the public ingress.
 
 ## API Endpoints
 
-### Skill Management (`/v0/skill`)
+### Skills (`/v0/skills`)
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/v0/skill/get/{id}` | Get a skill by ID |
-| `GET` | `/v0/skill/get-all/{userId}` | Get all skills for a user |
-| `POST` | `/v0/skill/add` | Create a new skill |
-| `POST` | `/v0/skill/add-all` | Create multiple skills in batch |
-| `POST` | `/v0/skill/edit` | Update an existing skill |
-| `POST` | `/v0/skill/delete` | Delete a skill (by body) |
-| `DELETE` | `/v0/skill/delete/{id}` | Delete a skill by ID |
-| `DELETE` | `/v0/skill/delete-all/{userId}` | Delete all skills for a user |
+| `GET` | `/v0/skills?page&size` | Page of the current user's skills |
+| `GET` | `/v0/skills/due?limit` | Up to 10 skills due now, most overdue first |
+| `GET` | `/v0/skills/{id}` | Get a skill |
+| `POST` | `/v0/skills` | Create a skill. `learnNow` makes the first review due immediately |
+| `POST` | `/v0/skills/batch` | Create several skills |
+| `PUT` | `/v0/skills/{id}` | Update name, description, interval, and priority |
+| `DELETE` | `/v0/skills/{id}` | Delete a skill |
+| `DELETE` | `/v0/skills` | Delete every skill of the current user |
+| `POST` | `/v0/skills/{id}/reviews` | Review with rating `AGAIN`, `HARD`, `GOOD`, or `EASY` |
+| `GET` | `/v0/skills/{id}/history` | Page of reviews for a skill |
+| `GET` | `/v0/skills/reviews` | Page of the current user's reviews |
 
-### Repetition (`/v0/skill/repeat`)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/v0/skill/repeat/{id}` | Mark a skill as repeated (advances level, updates next date, logs history) |
-
-### Repeat History (`/v0/repeat-history`)
+### Settings (`/v0/settings`)
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/v0/repeat-history/skill/{skillId}` | Get repetition history for a skill |
-| `GET` | `/v0/repeat-history/user/{userId}` | Get repetition history for all of a user's skills |
+| `GET` | `/v0/settings` | Reminder time zone and hour. Defaults are UTC and 09:00 |
+| `PUT` | `/v0/settings` | Save reminder time zone and hour |
 
 ### Infrastructure
 
 | Path | Description |
 |------|-------------|
-| `/health` | Health check (Micronaut management) |
-| `/swagger-ui` | Interactive API documentation |
-| `/prometheus` | Metrics endpoint |
+| `/health/liveness` | Process is up. Does not check the database |
+| `/health/readiness` | Ready to serve traffic, including the database |
+| `/swagger-ui` | Interactive API documentation (development only) |
+| `/prometheus` | Metrics endpoint (not routed on the public ingress) |
 
 ## Module Structure
 
 ```
 skill-repeater-service/
-├── pom.xml                       # Parent POM (Micronaut 4.5, Java 25)
+├── pom.xml                       # Parent POM (Micronaut 5.2, Java 25)
 ├── skill-repeater-api/           # Shared DTOs, enums (Priority, Period), validation
 ├── skill-repeater-core/          # Domain logic
 │   ├── model/                    # Skill, RepeatHistory entities
 │   ├── repository/               # Micronaut Data JDBC repositories
 │   ├── service/                  # SkillService, RepeatHistoryService
-│   ├── worker/                   # RepeatServiceImpl (scheduled reminder job)
+│   ├── worker/                   # ReminderJob (every 15 minutes)
 │   └── notification/             # Email notification via external services
 └── skill-repeater-web/           # HTTP application
-    ├── controller/               # SkillController, RepeatController, RepeatHistoryController
+    ├── controller/               # SkillController, SettingsController
     ├── exception/                # Global exception handlers
     └── resources/
         ├── application-dev.yml   # Dev config (local PostgreSQL)
         ├── application-prod.yml  # Prod config (env-based)
-        └── db/migration/         # Flyway migrations (V1–V7)
+        └── db/migration/         # Flyway migrations (V1–V8)
 ```
 
 ## Tech Stack
@@ -100,7 +98,12 @@ On **repeat**: `lastRepeated` = now, `nextRepeated` = now + (number × period), 
 | `DATASOURCE_URL` | JDBC connection string | `jdbc:postgresql://localhost:5433/skill_repeater_db` |
 | `DATASOURCE_USERNAME` | Database username | — |
 | `DATASOURCE_PASSWORD` | Database password | — |
-| `JWT_GENERATOR_SIGNATURE_SECRET` | JWT signing secret | — |
+| `JWT_GENERATOR_SIGNATURE_SECRET` | HMAC secret used to validate access tokens from auth-service | — |
+| `AUTH_JWT_ISSUER` | Expected JWT issuer | `https://auth.posadskiy.com` |
+| `AUTH_JWT_AUDIENCE` | Expected JWT audience | `api.posadskiy.com` |
+| `AUTH_SERVICE_URL` | Auth service base URL for reminder client-credentials | `http://auth-service.local` |
+| `AUTH_SERVICE_CLIENT_ID` | Service account client id | `system` |
+| `AUTH_SERVICE_CLIENT_SECRET` | Service account client secret | — |
 | `OTEL_SERVICE_NAME` | Logical service name for traces | `skill-repeater-service` |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP gRPC endpoint (Grafana Alloy) | `http://localhost:4317` |
 | `OTEL_TRACES_SAMPLER` | OpenTelemetry sampler | `parentbased_traceidratio` |
@@ -127,7 +130,7 @@ Once running, visit [http://localhost:8210/swagger-ui](http://localhost:8210/swa
 
 ## Deployment
 
-Production Docker image uses a multi-stage build (Amazon Corretto 25) and includes JDWP debug support on port 5005.
+The production image is a multi-stage build. The runtime stage is Eclipse Temurin 25 JRE on Alpine, runs as a non-root user, and does not open a debug port. `MICRONAUT_ENVIRONMENTS` defaults to `prod` and can be overridden in the pod.
 
 Kubernetes manifest and deploy scripts are in `deployment/`. Shared cluster config lives in the parent repo's `deployment/` directory.
 

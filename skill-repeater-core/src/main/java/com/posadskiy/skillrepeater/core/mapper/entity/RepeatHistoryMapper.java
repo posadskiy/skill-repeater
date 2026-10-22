@@ -6,10 +6,9 @@ import io.micronaut.context.annotation.Mapper;
 import jakarta.inject.Singleton;
 
 @Singleton
+@Mapper
 public interface RepeatHistoryMapper {
-    @Mapper.Mapping(from = "skillId", to = "skillId")
-    RepeatHistory mapFromEntity(RepeatHistoryEntity user);
+    RepeatHistory mapFromEntity(RepeatHistoryEntity entity);
 
-    @Mapper.Mapping(from = "skillId", to = "skillId")
-    RepeatHistoryEntity mapToEntity(RepeatHistory user);
+    RepeatHistoryEntity mapToEntity(RepeatHistory history);
 }

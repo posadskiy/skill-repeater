@@ -1,17 +1,15 @@
 package com.posadskiy.skillrepeater.core.storage.db.entity;
 
-import io.micronaut.core.annotation.NonNull;
+import com.posadskiy.skillrepeater.api.model.ReviewRating;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.annotation.DateCreated;
 import io.micronaut.data.annotation.GeneratedValue;
 import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.MappedEntity;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
-@Data
 @MappedEntity("repeat_history")
 public class RepeatHistoryEntity {
 
@@ -19,11 +17,9 @@ public class RepeatHistoryEntity {
     @GeneratedValue(GeneratedValue.Type.UUID)
     private String id;
 
-    @NonNull
     @NotBlank
     private String skillId;
 
-    @NonNull
     @NotBlank
     private String userId;
 
@@ -31,7 +27,16 @@ public class RepeatHistoryEntity {
     private String comment;
 
     @DateCreated
-    private LocalDateTime repeatedAt;
+    private OffsetDateTime repeatedAt;
+
+    @Nullable
+    private ReviewRating rating;
+
+    @Nullable
+    private Long intervalSeconds;
+
+    @Nullable
+    private Integer level;
 
     public String getId() {
         return id;
@@ -41,35 +46,59 @@ public class RepeatHistoryEntity {
         this.id = id;
     }
 
-    public @NonNull @NotBlank String getSkillId() {
+    public String getSkillId() {
         return skillId;
     }
 
-    public void setSkillId(@NonNull @NotBlank String skillId) {
+    public void setSkillId(String skillId) {
         this.skillId = skillId;
     }
 
-    public @NonNull @NotBlank String getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(@NonNull @NotBlank String userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
-    public @Nullable String getComment() {
+    public String getComment() {
         return comment;
     }
 
-    public void setComment(@Nullable String comment) {
+    public void setComment(String comment) {
         this.comment = comment;
     }
 
-    public LocalDateTime getRepeatedAt() {
+    public OffsetDateTime getRepeatedAt() {
         return repeatedAt;
     }
 
-    public void setRepeatedAt(LocalDateTime repeatedAt) {
+    public void setRepeatedAt(OffsetDateTime repeatedAt) {
         this.repeatedAt = repeatedAt;
+    }
+
+    public ReviewRating getRating() {
+        return rating;
+    }
+
+    public void setRating(ReviewRating rating) {
+        this.rating = rating;
+    }
+
+    public Long getIntervalSeconds() {
+        return intervalSeconds;
+    }
+
+    public void setIntervalSeconds(Long intervalSeconds) {
+        this.intervalSeconds = intervalSeconds;
+    }
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
     }
 }

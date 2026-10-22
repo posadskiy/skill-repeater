@@ -31,9 +31,8 @@ class PriorityTest {
 
     @Test
     void testFromValueInvalid() {
-        // Should default to MEDIUM for invalid values
-        assertEquals(Priority.MEDIUM, Priority.fromValue(0));
-        assertEquals(Priority.MEDIUM, Priority.fromValue(5));
+        assertThrows(IllegalArgumentException.class, () -> Priority.fromValue(0));
+        assertThrows(IllegalArgumentException.class, () -> Priority.fromValue(5));
     }
 
     @Test
@@ -54,8 +53,7 @@ class PriorityTest {
 
     @Test
     void testFromStringInvalid() {
-        // Should default to MEDIUM for invalid values
-        assertEquals(Priority.MEDIUM, Priority.fromString("INVALID"));
-        assertEquals(Priority.MEDIUM, Priority.fromString(""));
+        assertThrows(IllegalArgumentException.class, () -> Priority.fromString("INVALID"));
+        assertThrows(IllegalArgumentException.class, () -> Priority.fromString(""));
     }
 } 

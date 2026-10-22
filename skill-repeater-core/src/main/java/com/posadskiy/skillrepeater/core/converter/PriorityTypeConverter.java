@@ -13,8 +13,12 @@ public class PriorityTypeConverter implements TypeConverter<Integer, Priority> {
     @Override
     public Optional<Priority> convert(Integer value, Class<Priority> targetType, ConversionContext context) {
         if (value == null) {
-            return Optional.of(Priority.MEDIUM);
+            return Optional.empty();
         }
-        return Optional.of(Priority.fromValue(value));
+        try {
+            return Optional.of(Priority.fromValue(value));
+        } catch (IllegalArgumentException exception) {
+            return Optional.empty();
+        }
     }
 } 

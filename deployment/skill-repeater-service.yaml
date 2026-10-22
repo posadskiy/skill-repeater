@@ -19,6 +19,11 @@ spec:
         prometheus.io/path: "/prometheus"
         prometheus.io/port: "8210"
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       imagePullSecrets:
         - name: dockerhub-registry-secret
       containers:
@@ -33,16 +38,6 @@ spec:
             configMapKeyRef:
               name: skill-repeater-config
               key: MICRONAUT_ENVIRONMENTS
-        - name: GITHUB_USERNAME
-          valueFrom:
-            configMapKeyRef:
-              name: skill-repeater-config
-              key: GITHUB_USERNAME
-        - name: GITHUB_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: skill-repeater-secrets
-              key: GITHUB_TOKEN
         - name: SKILL_REPEATER_DATABASE_NAME
           valueFrom:
             configMapKeyRef:
@@ -73,6 +68,41 @@ spec:
             secretKeyRef:
               name: skill-repeater-secrets
               key: JWT_GENERATOR_SIGNATURE_SECRET
+        - name: AUTH_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: skill-repeater-config
+              key: AUTH_SERVICE_URL
+        - name: AUTH_SERVICE_CLIENT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: skill-repeater-config
+              key: AUTH_SERVICE_CLIENT_ID
+        - name: AUTH_SERVICE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: skill-repeater-secrets
+              key: AUTH_SERVICE_CLIENT_SECRET
+        - name: AUTH_JWT_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              name: skill-repeater-config
+              key: AUTH_JWT_ISSUER
+        - name: AUTH_JWT_AUDIENCE
+          valueFrom:
+            configMapKeyRef:
+              name: skill-repeater-config
+              key: AUTH_JWT_AUDIENCE
+        - name: APP_PUBLIC_URL
+          valueFrom:
+            configMapKeyRef:
+              name: skill-repeater-config
+              key: APP_PUBLIC_URL
+        - name: EMAIL_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: skill-repeater-config
+              key: EMAIL_SERVICE_URL
         - name: OTEL_SERVICE_NAME
           value: "skill-repeater-service"
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
@@ -88,18 +118,30 @@ spec:
           limits:
             memory: "1Gi"
             cpu: "500m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+        volumeMounts:
+          - name: tmp
+            mountPath: /tmp
         livenessProbe:
           httpGet:
-            path: /health
+            path: /health/liveness
             port: 8210
-          initialDelaySeconds: 120
+          initialDelaySeconds: 30
           periodSeconds: 30
         readinessProbe:
           httpGet:
-            path: /health
+            path: /health/readiness
             port: 8210
-          initialDelaySeconds: 60
+          initialDelaySeconds: 20
           periodSeconds: 10
+      volumes:
+        - name: tmp
+          emptyDir: {}
       restartPolicy: Always
 ---
 apiVersion: v1

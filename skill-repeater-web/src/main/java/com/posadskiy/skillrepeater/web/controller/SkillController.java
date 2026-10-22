@@ -1,198 +1,178 @@
 package com.posadskiy.skillrepeater.web.controller;
 
+import com.posadskiy.skillrepeater.api.dto.RepeatHistoryPageDto;
+import com.posadskiy.skillrepeater.api.dto.ReviewRequest;
 import com.posadskiy.skillrepeater.api.dto.SkillDto;
+import com.posadskiy.skillrepeater.api.dto.SkillPageDto;
+import com.posadskiy.skillrepeater.core.mapper.dto.RepeatHistoryDtoMapper;
 import com.posadskiy.skillrepeater.core.mapper.dto.SkillDtoMapper;
+import com.posadskiy.skillrepeater.core.model.PageResult;
+import com.posadskiy.skillrepeater.core.model.RepeatHistory;
 import com.posadskiy.skillrepeater.core.model.Skill;
+import com.posadskiy.skillrepeater.core.service.RepeatHistoryService;
+import com.posadskiy.skillrepeater.core.service.ReviewService;
 import com.posadskiy.skillrepeater.core.service.SkillService;
-import io.micronaut.http.annotation.*;
+import com.posadskiy.skillrepeater.web.security.SkillAuthorization;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.annotation.Body;
+import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.Delete;
+import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.PathVariable;
+import io.micronaut.http.annotation.Post;
+import io.micronaut.http.annotation.Put;
+import io.micronaut.http.annotation.QueryValue;
+import io.micronaut.http.annotation.Status;
 import io.micronaut.security.annotation.Secured;
+import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.tracing.annotation.NewSpan;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.NoArgsConstructor;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
 @Secured(SecurityRule.IS_AUTHENTICATED)
-@Controller("v0/skill")
-@NoArgsConstructor
-@Tag(name = "Skill Management", description = "APIs for managing user skills")
+@Controller("/v0/skills")
+@Tag(name = "Skills")
 public class SkillController {
 
-    private SkillService skillService;
-    private SkillDtoMapper skillDtoMapper;
+    private final SkillService skillService;
+    private final ReviewService reviewService;
+    private final RepeatHistoryService repeatHistoryService;
+    private final SkillDtoMapper skillDtoMapper;
+    private final RepeatHistoryDtoMapper repeatHistoryDtoMapper;
+    private final SkillAuthorization skillAuthorization;
 
-    public SkillController(SkillService skillService, SkillDtoMapper skillDtoMapper) {
+    public SkillController(
+            SkillService skillService,
+            ReviewService reviewService,
+            RepeatHistoryService repeatHistoryService,
+            SkillDtoMapper skillDtoMapper,
+            RepeatHistoryDtoMapper repeatHistoryDtoMapper,
+            SkillAuthorization skillAuthorization) {
         this.skillService = skillService;
+        this.reviewService = reviewService;
+        this.repeatHistoryService = repeatHistoryService;
         this.skillDtoMapper = skillDtoMapper;
+        this.repeatHistoryDtoMapper = repeatHistoryDtoMapper;
+        this.skillAuthorization = skillAuthorization;
     }
 
-    @Get("get/{id}")
+    @Get
     @NewSpan
-    @Operation(
-        summary = "Get skill by ID",
-        description = "Retrieves a specific skill by its unique identifier"
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Successfully retrieved skill",
-        content = @Content(mediaType = "application/json", schema = @Schema(implementation = SkillDto.class))
-    )
-    @ApiResponse(
-        responseCode = "404",
-        description = "Skill not found"
-    )
-    public SkillDto getById(
-        @Parameter(description = "ID of the skill to retrieve", required = true, example = "123e4567-e89b-12d3-a456-426614174000")
-        @PathVariable final String id
-    ) {
-        return skillDtoMapper.mapToDto(
-            skillService.get(id)
-        );
+    public SkillPageDto list(
+            Authentication authentication,
+            @QueryValue(defaultValue = "0") int page,
+            @QueryValue(defaultValue = "20") int size) {
+        String userId = skillAuthorization.currentUserId(authentication);
+        return toPage(skillService.pageByUser(userId, page, size));
     }
 
-    @Get("get-all/{userId}")
+    @Get("/due")
     @NewSpan
-    @Operation(
-        summary = "Get all skills for a user",
-        description = "Retrieves a list of all skills associated with the specified user ID"
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Successfully retrieved skills",
-        content = @Content(mediaType = "application/json", schema = @Schema(implementation = SkillDto.class))
-    )
-    public List<SkillDto> getAll(
-        @Parameter(description = "ID of the user to get skills for", required = true)
-        @PathVariable final String userId
-    ) {
-        return skillService.getAllByUser(userId)
-            .stream()
-            .map(skillDtoMapper::mapToDto)
-            .toList();
+    public List<SkillDto> due(
+            Authentication authentication,
+            @QueryValue(defaultValue = "10") int limit) {
+        String userId = skillAuthorization.currentUserId(authentication);
+        return skillService.due(userId, limit).stream().map(skillDtoMapper::mapToDto).toList();
     }
 
-    @Post("add")
+    @Get("/{id}")
     @NewSpan
-    @Operation(
-        summary = "Add a new skill",
-        description = "Creates a new skill for a user"
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Successfully added skill",
-        content = @Content(mediaType = "application/json", schema = @Schema(implementation = SkillDto.class))
-    )
-    public SkillDto add(
-        @Parameter(description = "Skill data to add", required = true)
-        @Body final SkillDto userDto
-    ) {
-        final Skill user = skillDtoMapper.mapFromDto(userDto);
-
-        return skillDtoMapper.mapToDto(
-            skillService.addSkill(user)
-        );
+    public SkillDto get(Authentication authentication, @PathVariable String id) {
+        return skillDtoMapper.mapToDto(skillAuthorization.requireSkill(authentication, id));
     }
 
-    @Post("add-all")
+    @Post
+    @Status(HttpStatus.CREATED)
     @NewSpan
-    @Operation(
-        summary = "Add multiple skills",
-        description = "Creates multiple new skills for a user"
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Successfully added skills",
-        content = @Content(mediaType = "application/json", schema = @Schema(implementation = SkillDto.class))
-    )
-    public List<SkillDto> add(
-        @Parameter(description = "List of skills to add", required = true)
-        @Body final List<SkillDto> userDtos
-    ) {
-        return userDtos.stream().map(this::add).toList();
+    public SkillDto create(Authentication authentication, @Body @Valid SkillDto skillDto) {
+        Skill skill = skillDtoMapper.mapFromDto(skillDto);
+        skillAuthorization.assignOwner(authentication, skill);
+        boolean learnNow = Boolean.TRUE.equals(skillDto.learnNow());
+        return skillDtoMapper.mapToDto(skillService.addSkill(skill, learnNow));
     }
 
-    @Post("edit")
+    @Post("/batch")
+    @Status(HttpStatus.CREATED)
     @NewSpan
-    @Operation(
-        summary = "Edit an existing skill",
-        description = "Updates an existing skill's information"
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Successfully updated skill",
-        content = @Content(mediaType = "application/json", schema = @Schema(implementation = SkillDto.class))
-    )
-    public SkillDto edit(
-        @Parameter(description = "Updated skill data", required = true)
-        @Body final SkillDto userDto
-    ) {
-        final Skill user = skillDtoMapper.mapFromDto(userDto);
-
-        return skillDtoMapper.mapToDto(
-            skillService.editSkill(user)
-        );
+    public List<SkillDto> createAll(Authentication authentication, @Body @Valid List<SkillDto> skills) {
+        return skills.stream().map(skill -> create(authentication, skill)).toList();
     }
 
-    @Post("delete")
+    @Put("/{id}")
     @NewSpan
-    @Operation(
-        summary = "Delete a skill",
-        description = "Removes a skill from the system"
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Successfully deleted skill"
-    )
-    public void delete(
-        @Parameter(description = "Skill to delete", required = true)
-        @Body final SkillDto userDto
-    ) {
-        final Skill user = skillDtoMapper.mapFromDto(userDto);
-
-        skillService.deleteSkill(user);
+    public SkillDto update(Authentication authentication, @PathVariable String id, @Body @Valid SkillDto skillDto) {
+        skillAuthorization.requireSkill(authentication, id);
+        Skill skill = skillDtoMapper.mapFromDto(skillDto);
+        skill.setId(id);
+        skillAuthorization.assignOwner(authentication, skill);
+        return skillDtoMapper.mapToDto(skillService.editSkill(skill));
     }
 
-    @Delete("delete/{id}")
+    @Delete
+    @Status(HttpStatus.NO_CONTENT)
     @NewSpan
-    @Operation(
-        summary = "Delete skill by ID",
-        description = "Removes a skill from the system by its ID"
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Successfully deleted skill"
-    )
-    @ApiResponse(
-        responseCode = "404",
-        description = "Skill not found"
-    )
-    public void deleteById(
-        @Parameter(description = "ID of the skill to delete", required = true)
-        @PathVariable final String id
-    ) {
+    public void deleteAll(Authentication authentication) {
+        skillService.deleteAllByUser(skillAuthorization.currentUserId(authentication));
+    }
+
+    @Delete("/{id}")
+    @Status(HttpStatus.NO_CONTENT)
+    @NewSpan
+    public void delete(Authentication authentication, @PathVariable String id) {
+        skillAuthorization.requireSkill(authentication, id);
         skillService.deleteById(id);
     }
 
-    @Delete("delete-all/{userId}")
+    @Post("/{id}/reviews")
     @NewSpan
-    @Operation(
-        summary = "Delete all skills for a user",
-        description = "Removes all skills associated with the specified user ID"
-    )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Successfully deleted all skills for the user"
-    )
-    public void deleteAllByUser(
-        @Parameter(description = "ID of the user whose skills should be deleted", required = true)
-        @PathVariable final String userId
-    ) {
-        skillService.deleteAllByUser(userId);
+    public SkillDto review(Authentication authentication, @PathVariable String id, @Body @Valid ReviewRequest request) {
+        skillAuthorization.requireSkill(authentication, id);
+        return skillDtoMapper.mapToDto(reviewService.review(
+                skillAuthorization.currentUserId(authentication),
+                id,
+                request.rating()
+        ));
+    }
+
+    @Get("/{id}/history")
+    @NewSpan
+    public RepeatHistoryPageDto history(
+            Authentication authentication,
+            @PathVariable String id,
+            @QueryValue(defaultValue = "0") int page,
+            @QueryValue(defaultValue = "20") int size) {
+        skillAuthorization.requireSkill(authentication, id);
+        return toHistoryPage(repeatHistoryService.pageBySkill(id, page, size));
+    }
+
+    @Get("/reviews")
+    @NewSpan
+    public RepeatHistoryPageDto reviews(
+            Authentication authentication,
+            @QueryValue(defaultValue = "0") int page,
+            @QueryValue(defaultValue = "20") int size) {
+        String userId = skillAuthorization.currentUserId(authentication);
+        return toHistoryPage(repeatHistoryService.pageByUser(userId, page, size));
+    }
+
+    private SkillPageDto toPage(PageResult<Skill> page) {
+        return new SkillPageDto(
+                page.items().stream().map(skillDtoMapper::mapToDto).toList(),
+                page.page(),
+                page.size(),
+                page.total()
+        );
+    }
+
+    private RepeatHistoryPageDto toHistoryPage(PageResult<RepeatHistory> page) {
+        return new RepeatHistoryPageDto(
+                page.items().stream().map(repeatHistoryDtoMapper::mapToDto).toList(),
+                page.page(),
+                page.size(),
+                page.total()
+        );
     }
 }

@@ -3,7 +3,7 @@ micronaut:
   application:
     name: skill-repeater-service
   server:
-    port: 8210
+    port: -1
     cors:
       enabled: true
       configurations:
@@ -13,7 +13,7 @@ micronaut:
   router:
     static-resources:
       swagger:
-        paths: classpath:META-INF/swagger
+        paths: classpath:META-INF/swagger/swagger/
         mapping: /swagger/**
       swagger-ui:
         paths: classpath:META-INF/swagger/views/swagger-ui
@@ -24,15 +24,12 @@ micronaut:
       jwt:
         signatures:
           secret:
-            generator:
+            validation:
               secret: "test-jwt-secret"
-        generator:
-          refresh-token:
-            enabled: true
-            secret: "test-jwt-secret"
-      generator:
-        access-token:
-          expiration: 1800
+        claims-validators:
+          issuer: https://auth.test
+          audience: api.test
+          not-before: true
     intercept-url-map:
       - pattern: /swagger/**
         access:
@@ -86,3 +83,21 @@ otel:
       protocol: grpc
   traces:
     exporter: none
+
+auth:
+  service:
+    url: http://localhost:8100
+  client:
+    id: system
+    secret: test-client-secret
+
+email:
+  service:
+    url: http://localhost:8090/email/template/send
+
+app:
+  public-url: http://localhost:3000
+
+reminders:
+  enabled: false
+

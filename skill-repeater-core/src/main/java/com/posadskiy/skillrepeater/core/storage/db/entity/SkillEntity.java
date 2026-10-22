@@ -1,17 +1,18 @@
 package com.posadskiy.skillrepeater.core.storage.db.entity;
 
-import io.micronaut.core.annotation.NonNull;
+import com.posadskiy.skillrepeater.api.model.Priority;
 import io.micronaut.core.annotation.Nullable;
-import io.micronaut.data.annotation.*;
+import io.micronaut.data.annotation.DateCreated;
+import io.micronaut.data.annotation.DateUpdated;
+import io.micronaut.data.annotation.GeneratedValue;
+import io.micronaut.data.annotation.Id;
+import io.micronaut.data.annotation.MappedEntity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import com.posadskiy.skillrepeater.api.model.Priority;
 
-@Data
 @MappedEntity("skills")
 public class SkillEntity {
 
@@ -19,42 +20,42 @@ public class SkillEntity {
     @GeneratedValue(GeneratedValue.Type.UUID)
     private String id;
 
-    @NonNull
     @NotBlank
     private String userId;
 
-    @NonNull
     @NotBlank
     private String name;
 
     @Nullable
     private String description;
 
-    @NonNull
     @NotNull
     private String period;
 
-    @NonNull
     @NotNull
     private Integer number;
 
-    @NonNull
     @NotNull
     private Integer level;
 
-    @NonNull
     @NotNull
     private Integer priority;
 
-    private LocalDateTime lastRepeated;
+    private OffsetDateTime lastRepeated;
 
-    private LocalDateTime nextRepeated;
+    private OffsetDateTime nextRepeated;
+
+    @NotNull
+    private Long intervalSeconds;
+
+    @Nullable
+    private OffsetDateTime lastNotifiedAt;
 
     @DateUpdated
-    private LocalDateTime updatedAt;
+    private OffsetDateTime updatedAt;
 
     @DateCreated
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 
     public String getId() {
         return id;
@@ -64,51 +65,51 @@ public class SkillEntity {
         this.id = id;
     }
 
-    public @NonNull @NotBlank String getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(@NonNull @NotBlank String userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
-    public @NonNull @NotBlank String getName() {
+    public String getName() {
         return name;
     }
 
-    public void setName(@NonNull @NotBlank String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
-    public @Nullable String getDescription() {
+    public String getDescription() {
         return description;
     }
 
-    public void setDescription(@Nullable String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
-    public @NonNull @NotNull String getPeriod() {
+    public String getPeriod() {
         return period;
     }
 
-    public void setPeriod(@NonNull @NotNull String period) {
+    public void setPeriod(String period) {
         this.period = period;
     }
 
-    public void setPeriod(@NonNull @NotNull ChronoUnit period) {
+    public void setPeriod(ChronoUnit period) {
         this.period = period.name();
     }
 
-    public @NonNull @NotNull Integer getNumber() {
+    public Integer getNumber() {
         return number;
     }
 
-    public void setNumber(@NonNull @NotNull Integer number) {
+    public void setNumber(Integer number) {
         this.number = number;
     }
 
-    public @NonNull @NotNull Integer getLevel() {
+    public Integer getLevel() {
         return level;
     }
 
@@ -116,47 +117,63 @@ public class SkillEntity {
         this.level = level;
     }
 
-    public @NonNull @NotNull Integer getPriority() {
+    public Integer getPriority() {
         return priority;
     }
 
-    public void setPriority(@NonNull @NotNull Integer priority) {
+    public void setPriority(Integer priority) {
         this.priority = priority;
     }
 
-    public void setPriority(@NonNull @NotNull Priority priority) {
+    public void setPriority(Priority priority) {
         this.priority = priority.getValue();
     }
 
-    public LocalDateTime getLastRepeated() {
+    public OffsetDateTime getLastRepeated() {
         return lastRepeated;
     }
 
-    public void setLastRepeated(LocalDateTime lastRepeated) {
+    public void setLastRepeated(OffsetDateTime lastRepeated) {
         this.lastRepeated = lastRepeated;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getNextRepeated() {
+    public OffsetDateTime getNextRepeated() {
         return nextRepeated;
     }
 
-    public void setNextRepeated(LocalDateTime nextRepeated) {
+    public void setNextRepeated(OffsetDateTime nextRepeated) {
         this.nextRepeated = nextRepeated;
+    }
+
+    public Long getIntervalSeconds() {
+        return intervalSeconds;
+    }
+
+    public void setIntervalSeconds(Long intervalSeconds) {
+        this.intervalSeconds = intervalSeconds;
+    }
+
+    public OffsetDateTime getLastNotifiedAt() {
+        return lastNotifiedAt;
+    }
+
+    public void setLastNotifiedAt(OffsetDateTime lastNotifiedAt) {
+        this.lastNotifiedAt = lastNotifiedAt;
+    }
+
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(OffsetDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(OffsetDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

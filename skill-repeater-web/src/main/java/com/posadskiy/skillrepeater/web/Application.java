@@ -13,9 +13,9 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 @OpenAPIDefinition(
     info = @Info(
         title = "Skill Repeater Service",
-        version = "0.1.0",
+        version = "0.3.0",
         description = "A service for managing and tracking skill repetition intervals to help users maintain and improve their skills through spaced repetition",
-        license = @License(name = "MIT", url = "https://opensource.org/license/mit"),
+        license = @License(name = "Proprietary"),
         contact = @Contact(url = "https://posadskiy.com", name = "Dimitri Posadskiy", email = "support@posadskiy.com")
     ),
     servers = {

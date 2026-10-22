@@ -1,55 +1,47 @@
 package com.posadskiy.skillrepeater.core.service.impl;
 
 import com.posadskiy.skillrepeater.core.mapper.entity.RepeatHistoryMapper;
+import com.posadskiy.skillrepeater.core.model.PageResult;
 import com.posadskiy.skillrepeater.core.model.RepeatHistory;
+import com.posadskiy.skillrepeater.core.service.PageRequests;
 import com.posadskiy.skillrepeater.core.service.RepeatHistoryService;
-import com.posadskiy.skillrepeater.core.service.SkillService;
 import com.posadskiy.skillrepeater.core.storage.db.RepeatHistoryRepository;
+import io.micronaut.data.model.Pageable;
 import jakarta.inject.Singleton;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Singleton
-@NoArgsConstructor
 public class RepeatHistoryServiceImpl implements RepeatHistoryService {
-    private RepeatHistoryRepository repeatHistoryRepository;
-    private RepeatHistoryMapper repeatHistoryMapper;
-    private SkillService skillService;
+    private final RepeatHistoryRepository repeatHistoryRepository;
+    private final RepeatHistoryMapper repeatHistoryMapper;
 
-    public RepeatHistoryServiceImpl(RepeatHistoryRepository repeatHistoryRepository, 
-                                  RepeatHistoryMapper repeatHistoryMapper,
-                                  SkillService skillService) {
+    public RepeatHistoryServiceImpl(RepeatHistoryRepository repeatHistoryRepository, RepeatHistoryMapper repeatHistoryMapper) {
         this.repeatHistoryRepository = repeatHistoryRepository;
         this.repeatHistoryMapper = repeatHistoryMapper;
-        this.skillService = skillService;
     }
 
     @Override
-    public void repeatSkill(String id) {
-        var skill = skillService.get(id);
-        var repeatHistory = new RepeatHistory();
-        repeatHistory.setSkillId(id);
-        repeatHistory.setUserId(skill.getUserId());
-
-        repeatHistoryRepository.save(
-            repeatHistoryMapper.mapToEntity(repeatHistory)
-        );
+    public PageResult<RepeatHistory> pageBySkill(String skillId, int page, int size) {
+        int safePage = PageRequests.page(page);
+        int safeSize = PageRequests.size(size);
+        List<RepeatHistory> items = repeatHistoryRepository
+                .findBySkillIdOrderByRepeatedAtDesc(skillId, Pageable.from(safePage, safeSize))
+                .stream()
+                .map(repeatHistoryMapper::mapFromEntity)
+                .toList();
+        return new PageResult<>(items, safePage, safeSize, repeatHistoryRepository.countBySkillId(skillId));
     }
 
     @Override
-    public List<RepeatHistory> getBySkillId(String skillId) {
-        return repeatHistoryRepository.findBySkillId(skillId)
-            .stream()
-            .map(repeatHistoryMapper::mapFromEntity)
-            .toList();
-    }
-
-    @Override
-    public List<RepeatHistory> getByUserId(String userId) {
-        return repeatHistoryRepository.findByUserId(userId)
-            .stream()
-            .map(repeatHistoryMapper::mapFromEntity)
-            .toList();
+    public PageResult<RepeatHistory> pageByUser(String userId, int page, int size) {
+        int safePage = PageRequests.page(page);
+        int safeSize = PageRequests.size(size);
+        List<RepeatHistory> items = repeatHistoryRepository
+                .findByUserIdOrderByRepeatedAtDesc(userId, Pageable.from(safePage, safeSize))
+                .stream()
+                .map(repeatHistoryMapper::mapFromEntity)
+                .toList();
+        return new PageResult<>(items, safePage, safeSize, repeatHistoryRepository.countByUserId(userId));
     }
 }

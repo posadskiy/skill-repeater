@@ -17,14 +17,17 @@ RUN --mount=type=cache,target=/root/.m2 \
     mvn -B -U clean install -pl skill-repeater-web -am -DskipTests -s /root/.m2/settings.xml
 
 # === Stage 2: Create the runtime image ===
-FROM amazoncorretto:25-alpine-jdk
+FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 
-# Copy the built JAR file from the build stage
-COPY --from=build /app/skill-repeater-web/target/skill-repeater-web-*.jar app.jar
+RUN addgroup -g 1000 -S app && adduser -u 1000 -S app -G app
 
-# Expose the application port (defined in application.yaml)
+COPY --from=build --chown=app:app /app/skill-repeater-web/target/skill-repeater-web-*.jar app.jar
+
+USER app
+
+ENV MICRONAUT_ENVIRONMENTS=prod
+
 EXPOSE 8210
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "-Dmicronaut.environments=${MICRONAUT_ENVIRONMENTS:-prod}", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

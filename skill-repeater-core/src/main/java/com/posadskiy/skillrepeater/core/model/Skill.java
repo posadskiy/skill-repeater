@@ -1,12 +1,15 @@
 package com.posadskiy.skillrepeater.core.model;
 
-import io.micronaut.core.annotation.Introspected;
-
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import com.posadskiy.skillrepeater.api.model.Priority;
-import lombok.Data;
+import io.micronaut.core.annotation.Introspected;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
+
+@Getter
+@Setter
 @Introspected
 public class Skill {
     private String id;
@@ -15,88 +18,11 @@ public class Skill {
     private String description;
     private ChronoUnit period;
     private Integer number;
-    private LocalDateTime lastRepeated;
-    private LocalDateTime nextRepeated;
+    private OffsetDateTime lastRepeated;
+    private OffsetDateTime nextRepeated;
     private Integer level;
     private Priority priority;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public ChronoUnit getPeriod() {
-        return period;
-    }
-
-    public void setPeriod(ChronoUnit period) {
-        this.period = period;
-    }
-
-    public Integer getNumber() {
-        return number;
-    }
-
-    public void setNumber(Integer number) {
-        this.number = number;
-    }
-
-    public LocalDateTime getLastRepeated() {
-        return lastRepeated;
-    }
-
-    public void setLastRepeated(LocalDateTime lastRepeated) {
-        this.lastRepeated = lastRepeated;
-    }
-
-    public LocalDateTime getNextRepeated() {
-        return nextRepeated;
-    }
-
-    public void setNextRepeated(LocalDateTime nextRepeated) {
-        this.nextRepeated = nextRepeated;
-    }
-
-    public Integer getLevel() {
-        return level;
-    }
-
-    public void setLevel(Integer level) {
-        this.level = level;
-    }
-
-    public Priority getPriority() {
-        return priority;
-    }
-
-    public void setPriority(Priority priority) {
-        this.priority = priority;
-    }
+    private Long intervalSeconds;
+    private OffsetDateTime lastNotifiedAt;
+    private Boolean learnNow;
 }

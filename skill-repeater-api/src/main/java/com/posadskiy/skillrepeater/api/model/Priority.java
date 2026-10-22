@@ -1,7 +1,5 @@
 package com.posadskiy.skillrepeater.api.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-
 /**
  * Priority levels for skills
  */
@@ -27,22 +25,23 @@ public enum Priority {
         return displayName;
     }
 
-    @JsonCreator
     public static Priority fromValue(int value) {
         for (Priority priority : values()) {
             if (priority.value == value) {
                 return priority;
             }
         }
-        // Default to MEDIUM for invalid values instead of throwing exception
-        return MEDIUM;
+        throw new IllegalArgumentException("Unknown priority: " + value);
     }
 
     public static Priority fromString(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Unknown priority: " + name);
+        }
         try {
             return Priority.valueOf(name.toUpperCase());
         } catch (IllegalArgumentException e) {
-            return MEDIUM; // Default to MEDIUM for invalid values
+            throw new IllegalArgumentException("Unknown priority: " + name);
         }
     }
 } 

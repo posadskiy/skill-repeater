@@ -24,15 +24,12 @@ micronaut:
       jwt:
         signatures:
           secret:
-            generator:
+            validation:
               secret: "${JWT_GENERATOR_SIGNATURE_SECRET}"
-        generator:
-          refresh-token:
-            enabled: true
-            secret: "${JWT_GENERATOR_SIGNATURE_SECRET}"
-      generator:
-        access-token:
-          expiration: 1800
+        claims-validators:
+          issuer: ${AUTH_JWT_ISSUER:`https://auth.posadskiy.com`}
+          audience: ${AUTH_JWT_AUDIENCE:api.posadskiy.com}
+          not-before: true
     intercept-url-map:
       - pattern: /swagger/**
         access:
@@ -52,6 +49,9 @@ micronaut:
       prometheus:
         enabled: true
         descriptions: true
+  lifecycle:
+    graceful-shutdown:
+      enabled: true
   tracing:
     opentelemetry:
       enabled: true
@@ -66,6 +66,10 @@ datasources:
     driver-class-name: org.postgresql.Driver
     schema-generate: NONE
     dialect: POSTGRES
+    maximum-pool-size: 2
+    minimum-idle: 0
+    connection-timeout: 3000
+    leak-detection-threshold: 60000
 flyway:
   datasources:
     default:
@@ -75,6 +79,15 @@ flyway:
 
 #tag::prometheus[]
 endpoints:
+  health:
+    enabled: true
+    sensitive: false
+  liveness:
+    enabled: true
+    sensitive: false
+  readiness:
+    enabled: true
+    sensitive: false
   prometheus:
     enabled: true
     sensitive: false
@@ -93,5 +106,23 @@ otel:
 logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}
+    io.micronaut.data.query: ${LOG_LEVEL_DATA_QUERY:INFO}
+
+auth:
+  service:
+    url: ${AUTH_SERVICE_URL:`http://auth-service.local`}
+  client:
+    id: ${AUTH_SERVICE_CLIENT_ID:system}
+    secret: ${AUTH_SERVICE_CLIENT_SECRET:}
+
+email:
+  service:
+    url: ${EMAIL_SERVICE_URL:`http://email-template-service.local/email/template/send`}
+
+app:
+  public-url: ${APP_PUBLIC_URL:`https://repeaty.posadskiy.com`}
+
+reminders:
+  enabled: true
 
 
