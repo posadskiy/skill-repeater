@@ -1,0 +1,86 @@
+#tag::micronaut[]
+micronaut:
+  application:
+    name: skill-repeater-service
+  server:
+    port: -1
+    cors:
+      enabled: true
+      configurations:
+        ui:
+          allowed-origins:
+            - http://localhost:3000
+  router:
+    static-resources:
+      swagger:
+        paths: classpath:META-INF/swagger
+        mapping: /swagger/**
+      swagger-ui:
+        paths: classpath:META-INF/swagger/views/swagger-ui
+        mapping: /swagger-ui/**
+  security:
+    authentication: bearer
+    token:
+      jwt:
+        signatures:
+          secret:
+            validation:
+              secret: "test-jwt-secret"
+        claims-validators:
+          issuer: https://auth.test
+          audience: api.test
+          not-before: true
+    intercept-url-map:
+      - pattern: /swagger/**
+        access:
+          - isAnonymous()
+      - pattern: /swagger-ui/**
+        access:
+          - isAnonymous()
+      - pattern: /openapi/**
+        access:
+          - isAnonymous()
+      - pattern: /prometheus
+        access:
+          - isAnonymous()
+  metrics:
+    enabled: true
+    export:
+      prometheus:
+        enabled: true
+        descriptions: true
+  tracing:
+    opentelemetry:
+      enabled: false
+#end::micronaut[]
+
+#tag::database[]
+datasources:
+  default:
+    url: "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE"
+    username: "test"
+    password: "test"
+    driver-class-name: org.h2.Driver
+    schema-generate: CREATE_DROP
+    dialect: H2
+flyway:
+  datasources:
+    default:
+      enabled: false
+#end::database[]
+
+#tag::prometheus[]
+endpoints:
+  prometheus:
+    enabled: true
+    sensitive: false
+#end::prometheus[] 
+
+otel:
+  exporter:
+    otlp:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
+      protocol: grpc
+  traces:
+    exporter: none
+

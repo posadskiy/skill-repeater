@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+
+# build-and-push.sh - Build and push skill-repeater-service to Docker Hub
+# Usage: ./build-and-push.sh <version>
+# Run from skill-repeater-service root.
+
+SERVICE_NAME="skill-repeater-service"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# deployment/scripts -> deployment -> skill-repeater-service/ (Dockerfile.prod lives here)
+SERVICE_MODULE_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
+
+if [ -z "$DOCKERHUB_USERNAME" ] || [ -z "$DOCKERHUB_TOKEN" ]; then
+  echo "Error: DOCKERHUB_USERNAME and DOCKERHUB_TOKEN are required" >&2
+  exit 1
+fi
+if [ $# -lt 1 ]; then
+  echo "Usage: $0 <version>" >&2
+  exit 1
+fi
+VERSION=$1
+
+echo "🚀 Building and pushing $SERVICE_NAME (version: $VERSION)..."
+docker buildx build --platform linux/arm64 \
+  -f "$SERVICE_MODULE_ROOT/Dockerfile.prod" \
+  -t "$DOCKERHUB_USERNAME/$SERVICE_NAME:$VERSION" \
+  -t "$DOCKERHUB_USERNAME/$SERVICE_NAME:latest" \
+  "$SERVICE_MODULE_ROOT/" --push
+
+echo "✅ $SERVICE_NAME image built and pushed successfully!"

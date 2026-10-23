@@ -1,0 +1,111 @@
+#tag::micronaut[]
+micronaut:
+  application:
+    name: skill-repeater-service
+  server:
+    port: 8210
+    cors:
+      enabled: true
+      configurations:
+        ui:
+          allowed-origins:
+            - http://localhost:3000
+  router:
+    static-resources:
+      swagger:
+        paths: classpath:META-INF/swagger
+        mapping: /swagger/**
+      swagger-ui:
+        paths: classpath:META-INF/swagger/views/swagger-ui
+        mapping: /swagger-ui/**
+  security:
+    authentication: bearer
+    token:
+      jwt:
+        signatures:
+          secret:
+            validation:
+              secret: "${JWT_GENERATOR_SIGNATURE_SECRET}"
+        claims-validators:
+          issuer: ${AUTH_JWT_ISSUER:`https://auth.posadskiy.com`}
+          audience: ${AUTH_JWT_AUDIENCE:api.posadskiy.com}
+          not-before: true
+    intercept-url-map:
+      - pattern: /swagger/**
+        access:
+          - isAnonymous()
+      - pattern: /swagger-ui/**
+        access:
+          - isAnonymous()
+      - pattern: /openapi/**
+        access:
+          - isAnonymous()
+      - pattern: /prometheus
+        access:
+          - isAnonymous()
+  metrics:
+    enabled: true
+    export:
+      prometheus:
+        enabled: true
+        descriptions: true
+  lifecycle:
+    graceful-shutdown:
+      enabled: true
+  tracing:
+    opentelemetry:
+      enabled: true
+#end::micronaut[]
+
+#tag::database[]
+datasources:
+  default:
+    url: jdbc:postgresql://localhost:5433/skill_repeater
+    username: ${SKILL_REPEATER_DATABASE_USER}
+    password: ${SKILL_REPEATER_DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    schema-generate: NONE
+    dialect: POSTGRES
+    maximum-pool-size: 2
+    minimum-idle: 0
+    connection-timeout: 3000
+    leak-detection-threshold: 60000
+flyway:
+  datasources:
+    default:
+      enabled: true
+      baseline-on-migrate: true
+#end::database[]
+
+#tag::prometheus[]
+endpoints:
+  health:
+    enabled: true
+    sensitive: false
+  liveness:
+    enabled: true
+    sensitive: false
+  readiness:
+    enabled: true
+    sensitive: false
+  prometheus:
+    enabled: true
+    sensitive: false
+#end::prometheus[]
+
+otel:
+  exporter:
+    otlp:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
+      protocol: grpc
+  traces:
+    exporter: otlp
+    sampler:
+      arg: ${OTEL_TRACES_SAMPLER_ARG:1.0}
+
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+    io.micronaut.data.query: ${LOG_LEVEL_DATA_QUERY:INFO}
+
+

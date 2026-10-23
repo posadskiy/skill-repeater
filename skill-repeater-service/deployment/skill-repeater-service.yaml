@@ -1,0 +1,136 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skill-repeater-service
+  namespace: skill-repeater
+  labels:
+    app: skill-repeater-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: skill-repeater-service
+  template:
+    metadata:
+      labels:
+        app: skill-repeater-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/prometheus"
+        prometheus.io/port: "8210"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      imagePullSecrets:
+        - name: dockerhub-registry-secret
+      containers:
+      - name: skill-repeater-service
+        image: ${DOCKERHUB_USERNAME}/skill-repeater-service:${IMAGE_VERSION}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8210
+        env:
+        - name: MICRONAUT_ENVIRONMENTS
+          valueFrom:
+            configMapKeyRef:
+              name: skill-repeater-config
+              key: MICRONAUT_ENVIRONMENTS
+        - name: SKILL_REPEATER_DATABASE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: skill-repeater-config
+              key: SKILL_REPEATER_DATABASE_NAME
+        - name: SKILL_REPEATER_DATABASE_USER
+          valueFrom:
+            configMapKeyRef:
+              name: skill-repeater-config
+              key: SKILL_REPEATER_DATABASE_USER
+        - name: DATASOURCE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: skill-repeater-config
+              key: SKILL_REPEATER_DATASOURCE_URL
+        - name: DATASOURCE_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: skill-repeater-config
+              key: SKILL_REPEATER_DATABASE_USER
+        - name: DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: skill-repeater-secrets
+              key: DATASOURCE_PASSWORD
+        - name: JWT_GENERATOR_SIGNATURE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: skill-repeater-secrets
+              key: JWT_GENERATOR_SIGNATURE_SECRET
+        - name: AUTH_JWT_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              name: skill-repeater-config
+              key: AUTH_JWT_ISSUER
+        - name: AUTH_JWT_AUDIENCE
+          valueFrom:
+            configMapKeyRef:
+              name: skill-repeater-config
+              key: AUTH_JWT_AUDIENCE
+        - name: OTEL_SERVICE_NAME
+          value: "skill-repeater-service"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://grafana-alloy.observability.svc.cluster.local:4317"
+        - name: OTEL_TRACES_SAMPLER
+          value: parentbased_traceidratio
+        - name: OTEL_TRACES_SAMPLER_ARG
+          value: "1.0"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+        volumeMounts:
+          - name: tmp
+            mountPath: /tmp
+        livenessProbe:
+          httpGet:
+            path: /health/liveness
+            port: 8210
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: 8210
+          initialDelaySeconds: 20
+          periodSeconds: 10
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: skill-repeater-service
+  namespace: skill-repeater
+  labels:
+    app: skill-repeater-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8210
+      targetPort: 8210
+      protocol: TCP
+  selector:
+    app: skill-repeater-service
