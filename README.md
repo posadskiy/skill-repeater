@@ -1,13 +1,15 @@
 # Skill Repeater
 
-A spaced-repetition platform for tracking and reinforcing skills over time. Define skills with custom intervals and priorities, and review them when they are due.
+A spaced-repetition app for practicing skills on a schedule. Define a skill, choose how often it should come back, and review it when it is due.
+
+The React app and the Micronaut API live in this repository, in `skill-repeater-front/` and `skill-repeater-service/`.
 
 **Live at [repeaty.posadskiy.com](https://repeaty.posadskiy.com)**
 
 ## Features
 
 - **Skill management** — create, edit, and delete skills with configurable repetition intervals (hours, days, weeks, months, years)
-- **Spaced repetition** — mark skills as repeated to advance the level and auto-calculate the next repetition date
+- **Spaced repetition** — rate a review Again, Hard, Good, or Easy. Good and Easy raise the level and grow the interval; Again returns to the starting interval
 - **Priority system** — assign Low / Medium / High / Critical priority to skills
 - **Repetition history** — full audit trail of when each skill was practiced
 - **Due queue** — the app shows skills that are ready to review
@@ -66,6 +68,8 @@ A spaced-repetition platform for tracking and reinforcing skills over time. Defi
 - Observability stack integration (Jaeger, Prometheus, Promtail)
 
 ## Repository Structure
+
+The frontend, the backend, and the shared deployment files are folders in this repository.
 
 ```
 skill-repeater/
